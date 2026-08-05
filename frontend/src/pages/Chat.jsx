@@ -71,7 +71,7 @@ export default function Chat() {
             <div className="text-[11px] text-emerald-400">{t("online")}</div>
           </div>
           <button onClick={() => nav("/app/recharge")} data-testid="chat-credits" className="grad-btn rounded-full px-2.5 py-1 text-[11px] font-bold flex items-center gap-1">
-            <Coins size={12} /> {user?.premium ? "∞" : (user?.credits || 0)}
+            <Coins size={12} /> {user?.premium ? "∞" : ((user?.free_messages || 0) > 0 ? `${user.free_messages} free` : (user?.credits || 0))}
           </button>
         </div>
 

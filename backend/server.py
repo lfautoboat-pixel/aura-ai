@@ -266,7 +266,8 @@ async def chat_send(body: ChatSend, user=Depends(current_user)):
                                   "role": "assistant", "text": reply, "ts": ts2})
 
     upd = {}
-    if not fresh.get("premium"):
+    llm_ok = "clouded for a moment" not in reply
+    if not fresh.get("premium") and llm_ok:
         if fresh.get("free_messages", 0) > 0:
             upd = {"$inc": {"free_messages": -1}}
         else:

@@ -21,7 +21,7 @@ function Header({ onInstall, installable }) {
           </button>
         )}
         <button data-testid="credits-pill" onClick={() => nav("/app/recharge")} className="grad-btn rounded-full px-3 py-1.5 text-xs font-bold flex items-center gap-1 text-white">
-          <Coins size={14} /> {user?.premium ? "∞" : (user?.credits || 0)}
+          <Coins size={14} /> {user?.premium ? "∞" : ((user?.free_messages || 0) > 0 ? `${user.free_messages} free` : (user?.credits || 0))}
         </button>
         <button data-testid="logout-btn" onClick={logout} className="glass rounded-full p-2"><LogOut size={14} /></button>
       </div>

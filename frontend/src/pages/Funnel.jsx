@@ -34,7 +34,7 @@ export default function Funnel() {
   const [advisors, setAdvisors] = useState([]);
   const [sending, setSending] = useState(false);
 
-  useEffect(() => { if (user) nav("/app"); }, [user, nav]);
+  useEffect(() => { if (user && s === 0) nav("/app"); }, [user, s, nav]);
 
   const set = (k, v) => setAns((a) => ({ ...a, [k]: v }));
   const next = () => setS((x) => x + 1);
