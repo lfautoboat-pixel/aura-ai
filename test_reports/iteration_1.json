@@ -1,0 +1,30 @@
+{
+  "summary": "Executed backend pytest (12 tests, 100% pass) and Playwright UI E2E for Aura AI. Full funnel (gender->topic->reading->DOB->loading->offer->email->OTP with dev code) works and lands user in /app. Bottom nav (chats/discover/guides/readings/rewards), credits-pill, guides list with chat-btn-<id>, chat with real Gemini reply (mystical multi-paragraph Leo response, no fallback), and Stripe checkout redirect (https://checkout.stripe.com/c/pay/cs_test_...) all verified. Backend endpoints /api/auth/request-otp (dev_code), /api/auth/verify-otp, /api/auth/google, /api/quiz (Leo for 8/15), /api/content/advisors, /api/content/discover, /api/billing/packs, /api/chat/send (real reply + decrement + 402 on exhaustion), /api/payments/checkout, /api/payments/status all pass.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "Funnel step 8 (advisor list)", "issue": "Step s===8 with data-testid=funnel-advisor-<id> is unreachable: after otp-verify, useEffect(() => { if (user) nav('/app') }) fires immediately once verify() calls login() which sets user, so setS(8) is preempted and user is redirected straight to /app before the funnel advisor screen renders. Not a blocker (advisors are still visible in /app Guides tab with chat-btn-<id>) but the intended funnel-advisor-* screen is dead code.", "selector": "[data-testid=\"funnel-advisor-aurelis\"]", "priority": "LOW"},
+      {"component": "Chat header chat-credits", "issue": "chat-credits pill shows '0' before and after sending a free message (free_messages went 3->2 on backend but header pill only shows premium credits count). User has no visible indicator that free messages decremented in the chat header.", "selector": "[data-testid=\"chat-credits\"]", "priority": "LOW"}
+    ],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": ["/app/backend/tests/backend_test.py", "/app/test_reports/pytest/pytest_results.xml"],
+  "action_items": [
+    "Consider showing free_messages remaining in chat-credits pill (currently only shows premium credits count of 0, appears misleading).",
+    "Either remove unreachable funnel step 8 (funnel-advisor-*) or guard the auto-redirect useEffect so users can see the advisor picker before entering /app (currently setS(8) after verify never renders because useEffect immediately navigates)."
+  ],
+  "critical_code_review_comments": [
+    "server.py chat/send: LLM call is inside try/except and on failure returns fallback 'The stars are clouded' with status 200 AND still decrements a free_message/credit -- consider NOT decrementing on LLM failure.",
+    "server.py: STRIPE_WEBHOOK_SECRET default is empty string; if webhook is invoked without configured secret construct_event will throw and return 400 which is fine, but webhook success path is unverified in tests.",
+    "Funnel.jsx has dead-code step 8 due to redirect useEffect firing before step change is rendered.",
+    "AppShell uses in-memory tabs (setTab) instead of nested routes, so /app/guides and /app/discover URLs are unreachable -- deep-linking to a specific tab is not possible."
+  ],
+  "updated_files": ["/app/backend/tests/backend_test.py"],
+  "success_rate": {"backend": "100% (12/12)", "frontend": "95% (all core flows work; only unreachable funnel step 8 and static chat-credits pill are minor UI issues)"},
+  "test_credentials": "Passwordless. Dev code shown on OTP screen and returned in /api/auth/request-otp response. Any email works. Google silent auth via POST /api/auth/google with {email,name}.",
+  "seed_data_creation": "Created TEST_ prefixed emails via API during tests (qa@aura.ai, qa_ui_<ts>@aura.ai, TEST_qa_<ts>@aura.ai, TEST_google_<ts>@aura.ai, TEST_exhaust_<ts>@aura.ai).",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Backend base URL: https://aura-connect-36.preview.emergentagent.com. Auth token stored in localStorage key 'aura_token'. Silent Google auth is easiest way to bootstrap UI tests: POST /api/auth/google {email,name} then localStorage.setItem('aura_token', token) and navigate to /app. AppShell uses internal tab state (setTab) — /app/guides/etc URLs do NOT exist; only /app, /app/chat/:id, /app/recharge, /payment/success, /payment/cancel are real routes. LLM Gemini reply typically returns in ~5-10s. Stripe checkout uses BR sandbox with plain (non-managed) checkout session; managed_payments fails and code falls back correctly."
+}
