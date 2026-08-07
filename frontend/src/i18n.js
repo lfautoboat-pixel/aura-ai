@@ -2,7 +2,8 @@
 import React, { createContext, useContext, useMemo, useState } from "react";
 
 const en = {
-  free_banner: "Your first 3 minutes are FREE",
+  free_banner: "Your first 3 messages are FREE",
+  no_card: "no credit card required",
   continue: "Continue",
   q_gender: "What is your gender?",
   female: "Female", male: "Male", other: "Other",
@@ -18,7 +19,7 @@ const en = {
   loading_title: "Aligning your stars",
   loading_sub: "Reading your cosmic energy…",
   offer_title: "Your reading is ready",
-  offer_sub: "Unlock 3 minutes with a live guide — completely free.",
+  offer_sub: "Unlock 3 messages with a live guide — completely free.",
   redeem: "Reveal my reading",
   profile_title: "Let's set up your profile",
   profile_sub: "We use this only to save your cosmic reading.",
@@ -30,17 +31,28 @@ const en = {
   otp_sub: "We sent a 6-digit code to",
   verify: "Verify & enter",
   advisors_title: "Choose your guide",
-  advisors_sub: "Hand-picked spiritual advisors, online now.",
+  advisors_sub: "Hand-picked spiritual advisors, available around the clock.",
   start_chat: "Start free chat",
   reviews: "reviews", years_exp: "yrs",
-  online: "Online",
+  online: "Online", busy: "Busy", offline: "Offline",
   nav_chats: "Chats", nav_discover: "Discover", nav_guides: "Guides", nav_readings: "Readings", nav_rewards: "Rewards",
+  chats_empty: "No readings yet. Choose a guide and start your first free chat.",
+  horoscope_daily: "The moon favours quiet courage today. A conversation you've delayed carries the key — speak from the heart and the universe will meet you halfway.",
+  avg_response: "avg. response", price_per_message: "Price per message", about_advisor: "About",
+  faq_title: "Frequently asked questions", advisor_not_found: "Guide not found.",
+  faq_q_credits: "How do credits work?", faq_a_credits: "Each message you send to a guide costs 1 credit (or is covered by your free messages / Premium plan). Buy credit packs anytime from the Recharge screen.",
+  faq_q_real: "Are the guides real people or AI?", faq_a_real: "Each guide is an AI persona built to bring their specialty (astrology, tarot, numerology...) to life — always available, day or night.",
+  faq_q_private: "Is my conversation private?", faq_a_private: "Yes. Your messages are stored securely and only used to personalize your readings — never sold or shared.",
+  faq_q_cancel: "Can I cancel Premium anytime?", faq_a_cancel: "Yes, cancel anytime from your Profile — you keep access until the end of the current billing period.",
+  filter_all: "All", filter_recommended: "Recommended", call_mode: "Call", text_mode: "Chat",
+  call_listening: "Listening…", call_speaking: "Speaking…", call_tap_to_talk: "Tap to talk",
+  call_not_supported: "Voice call isn't supported in this browser. Try Chrome or Edge.",
   type_msg: "Write a message…",
   send: "Send",
   free_left: "free messages left",
   credits: "credits",
-  out_title: "You're out of credits",
-  out_sub: "Recharge to keep your reading flowing.",
+  out_title: "The stars ask for a small offering",
+  out_sub: "Your free reading gave you a glimpse — recharge to keep the conversation flowing.",
   recharge: "Recharge credits",
   popular: "Most popular",
   premium_title: "Aura Premium",
@@ -58,10 +70,41 @@ const en = {
   your_sign: "Your sign",
   welcome_back: "Welcome back",
   skip: "Skip for now",
+  pay_pix: "Pay with Pix",
+  pay_card: "Pay with card",
+  express_pay: "Express checkout",
+  wallets_note: "Apple Pay & Google Pay available at checkout",
+  pix_note: "Instant Pix & local cards",
+  flash_title: "Flash offer",
+  flash_sub: "160 credits at the lowest price — only for a few minutes.",
+  flash_cta: "Claim flash deal",
+  flash_ends: "Offer ends in",
+  locked: "Locked",
+  unlock_title: "Unlock this reading",
+  unlock_sub: "Get Aura Premium for unlimited access to every course, ritual and reading.",
+  unlock_cta: "Unlock with Premium",
+  maybe_later: "Maybe later",
+  profile: "Profile",
+  purchase_history: "Purchase history",
+  no_purchases: "No purchases yet",
+  member_since: "Member since",
+  language: "Language",
+  privacy: "Privacy Policy",
+  terms: "Terms of Use",
+  premium_active: "Premium active",
+  free_plan: "Free plan",
+  best_value: "Best value · save 60%",
+  most_online: "Most advisors are online now",
+  consent_text: "By continuing you agree to our Terms and Privacy Policy. We protect your data under GDPR & LGPD.",
+  insights_title: "Insights", read_more: "Read more", read_less: "Show less",
+  notifications: "Notifications", notifications_on: "Notifications on", notifications_off: "Notifications off",
+  notifications_desc: "Get a nudge when a guide is online or has something for you.",
+  notifications_test: "Send a test notification", notifications_test_sent: "Sent — check your device",
 };
 
 const pt = {
-  free_banner: "Seus 3 primeiros minutos são GRÁTIS",
+  free_banner: "Suas 3 primeiras mensagens são GRÁTIS",
+  no_card: "sem necessidade de cartão de crédito",
   continue: "Continuar",
   q_gender: "Qual é o seu gênero?",
   female: "Feminino", male: "Masculino", other: "Outro",
@@ -77,7 +120,7 @@ const pt = {
   loading_title: "Alinhando suas estrelas",
   loading_sub: "Lendo sua energia cósmica…",
   offer_title: "Sua leitura está pronta",
-  offer_sub: "Desbloqueie 3 minutos com um guia ao vivo — totalmente grátis.",
+  offer_sub: "Desbloqueie 3 mensagens com um guia ao vivo — totalmente grátis.",
   redeem: "Revelar minha leitura",
   profile_title: "Vamos criar seu perfil",
   profile_sub: "Usamos isso apenas para salvar sua leitura cósmica.",
@@ -89,17 +132,28 @@ const pt = {
   otp_sub: "Enviamos um código de 6 dígitos para",
   verify: "Verificar & entrar",
   advisors_title: "Escolha seu guia",
-  advisors_sub: "Conselheiros espirituais selecionados, online agora.",
+  advisors_sub: "Conselheiros espirituais selecionados, disponíveis a qualquer hora.",
   start_chat: "Iniciar chat grátis",
   reviews: "avaliações", years_exp: "anos",
-  online: "Online",
+  online: "Online", busy: "Ocupado", offline: "Offline",
   nav_chats: "Chats", nav_discover: "Descobrir", nav_guides: "Videntes", nav_readings: "Leituras", nav_rewards: "Recompensas",
+  chats_empty: "Nenhuma leitura ainda. Escolha um vidente e comece seu primeiro chat grátis.",
+  horoscope_daily: "A lua favorece a coragem silenciosa hoje. Uma conversa que você adiou guarda a chave — fale com o coração e o universo virá ao seu encontro.",
+  avg_response: "resposta média", price_per_message: "Preço por mensagem", about_advisor: "Sobre",
+  faq_title: "Perguntas frequentes", advisor_not_found: "Vidente não encontrado.",
+  faq_q_credits: "Como funcionam os créditos?", faq_a_credits: "Cada mensagem enviada a um vidente custa 1 crédito (ou é coberta pelas mensagens grátis / plano Premium). Compre pacotes de créditos quando quiser na tela de Recarregar.",
+  faq_q_real: "Os videntes são pessoas reais ou IA?", faq_a_real: "Cada vidente é uma persona de IA construída para dar vida à sua especialidade (astrologia, tarô, numerologia...) — sempre disponível, de dia ou de noite.",
+  faq_q_private: "Minha conversa é privada?", faq_a_private: "Sim. Suas mensagens são armazenadas com segurança e usadas só para personalizar suas leituras — nunca vendidas ou compartilhadas.",
+  faq_q_cancel: "Posso cancelar o Premium quando quiser?", faq_a_cancel: "Sim, cancele quando quiser no seu Perfil — você mantém acesso até o fim do período já pago.",
+  filter_all: "Todos", filter_recommended: "Recomendados", call_mode: "Ligar", text_mode: "Chat",
+  call_listening: "Ouvindo…", call_speaking: "Falando…", call_tap_to_talk: "Toque para falar",
+  call_not_supported: "Chamada de voz não é suportada neste navegador. Tente Chrome ou Edge.",
   type_msg: "Escreva uma mensagem…",
   send: "Enviar",
   free_left: "mensagens grátis restantes",
   credits: "créditos",
-  out_title: "Você ficou sem créditos",
-  out_sub: "Recarregue para continuar sua leitura.",
+  out_title: "As estrelas pedem uma pequena oferenda",
+  out_sub: "Sua leitura grátis já revelou um vislumbre — recarregue para manter a conversa fluindo.",
   recharge: "Recarregar créditos",
   popular: "Mais popular",
   premium_title: "Aura Premium",
@@ -117,10 +171,41 @@ const pt = {
   your_sign: "Seu signo",
   welcome_back: "Bem-vindo de volta",
   skip: "Pular por enquanto",
+  pay_pix: "Pagar com Pix",
+  pay_card: "Pagar com cartão",
+  express_pay: "Pagamento expresso",
+  wallets_note: "Apple Pay e Google Pay disponíveis no checkout",
+  pix_note: "Pix instantâneo e cartões nacionais",
+  flash_title: "Oferta relâmpago",
+  flash_sub: "160 créditos pelo menor preço — só por alguns minutos.",
+  flash_cta: "Garantir oferta relâmpago",
+  flash_ends: "A oferta termina em",
+  locked: "Bloqueado",
+  unlock_title: "Desbloqueie esta leitura",
+  unlock_sub: "Assine o Aura Premium para acesso ilimitado a todos os cursos, rituais e leituras.",
+  unlock_cta: "Desbloquear com Premium",
+  maybe_later: "Talvez depois",
+  profile: "Perfil",
+  purchase_history: "Histórico de compras",
+  no_purchases: "Nenhuma compra ainda",
+  member_since: "Membro desde",
+  language: "Idioma",
+  privacy: "Política de Privacidade",
+  terms: "Termos de Uso",
+  premium_active: "Premium ativo",
+  free_plan: "Plano gratuito",
+  best_value: "Melhor valor · economize 60%",
+  most_online: "A maioria dos videntes está online agora",
+  consent_text: "Ao continuar, você concorda com nossos Termos e Política de Privacidade. Protegemos seus dados sob GDPR e LGPD.",
+  insights_title: "Insights", read_more: "Ler mais", read_less: "Ver menos",
+  notifications: "Notificações", notifications_on: "Notificações ativadas", notifications_off: "Notificações desativadas",
+  notifications_desc: "Receba um aviso quando um vidente estiver online ou tiver algo pra você.",
+  notifications_test: "Enviar notificação de teste", notifications_test_sent: "Enviada — confira seu dispositivo",
 };
 
 const es = {
-  free_banner: "Tus primeros 3 minutos son GRATIS",
+  free_banner: "Tus primeros 3 mensajes son GRATIS",
+  no_card: "sin necesidad de tarjeta de crédito",
   continue: "Continuar",
   q_gender: "¿Cuál es tu género?",
   female: "Femenino", male: "Masculino", other: "Otro",
@@ -136,7 +221,7 @@ const es = {
   loading_title: "Alineando tus estrellas",
   loading_sub: "Leyendo tu energía cósmica…",
   offer_title: "Tu lectura está lista",
-  offer_sub: "Desbloquea 3 minutos con un guía en vivo — totalmente gratis.",
+  offer_sub: "Desbloquea 3 mensajes con un guía en vivo — totalmente gratis.",
   redeem: "Revelar mi lectura",
   profile_title: "Configuremos tu perfil",
   profile_sub: "Solo lo usamos para guardar tu lectura cósmica.",
@@ -148,17 +233,28 @@ const es = {
   otp_sub: "Enviamos un código de 6 dígitos a",
   verify: "Verificar & entrar",
   advisors_title: "Elige tu guía",
-  advisors_sub: "Consejeros espirituales seleccionados, en línea ahora.",
+  advisors_sub: "Consejeros espirituales seleccionados, disponibles a toda hora.",
   start_chat: "Iniciar chat gratis",
   reviews: "reseñas", years_exp: "años",
-  online: "En línea",
+  online: "En línea", busy: "Ocupado", offline: "Sin conexión",
   nav_chats: "Chats", nav_discover: "Descubrir", nav_guides: "Guías", nav_readings: "Lecturas", nav_rewards: "Recompensas",
+  chats_empty: "Aún no hay lecturas. Elige una guía y comienza tu primer chat gratis.",
+  horoscope_daily: "La luna favorece el coraje silencioso hoy. Una conversación que has postergado guarda la clave — habla desde el corazón y el universo te encontrará a mitad de camino.",
+  avg_response: "respuesta media", price_per_message: "Precio por mensaje", about_advisor: "Sobre",
+  faq_title: "Preguntas frecuentes", advisor_not_found: "Guía no encontrada.",
+  faq_q_credits: "¿Cómo funcionan los créditos?", faq_a_credits: "Cada mensaje enviado a una guía cuesta 1 crédito (o está cubierto por tus mensajes gratis / plan Premium). Compra paquetes de créditos cuando quieras.",
+  faq_q_real: "¿Las guías son personas reales o IA?", faq_a_real: "Cada guía es una persona de IA creada para dar vida a su especialidad (astrología, tarot, numerología...) — siempre disponible, de día o de noche.",
+  faq_q_private: "¿Mi conversación es privada?", faq_a_private: "Sí. Tus mensajes se almacenan de forma segura y solo se usan para personalizar tus lecturas — nunca vendidos ni compartidos.",
+  faq_q_cancel: "¿Puedo cancelar Premium cuando quiera?", faq_a_cancel: "Sí, cancela cuando quieras desde tu Perfil — mantienes el acceso hasta el final del período ya pagado.",
+  filter_all: "Todos", filter_recommended: "Recomendados", call_mode: "Llamar", text_mode: "Chat",
+  call_listening: "Escuchando…", call_speaking: "Hablando…", call_tap_to_talk: "Toca para hablar",
+  call_not_supported: "La llamada de voz no es compatible con este navegador. Prueba Chrome o Edge.",
   type_msg: "Escribe un mensaje…",
   send: "Enviar",
   free_left: "mensajes gratis restantes",
   credits: "créditos",
-  out_title: "Te quedaste sin créditos",
-  out_sub: "Recarga para seguir tu lectura.",
+  out_title: "Las estrellas piden una pequeña ofrenda",
+  out_sub: "Tu lectura gratis ya reveló un vistazo — recarga para seguir la conversación.",
   recharge: "Recargar créditos",
   popular: "Más popular",
   premium_title: "Aura Premium",
@@ -176,11 +272,51 @@ const es = {
   your_sign: "Tu signo",
   welcome_back: "Bienvenido de nuevo",
   skip: "Omitir por ahora",
+  pay_pix: "Pagar con Pix",
+  pay_card: "Pagar con tarjeta",
+  express_pay: "Pago exprés",
+  wallets_note: "Apple Pay y Google Pay disponibles en el checkout",
+  pix_note: "Pix instantáneo y tarjetas locales",
+  flash_title: "Oferta relámpago",
+  flash_sub: "160 créditos al precio más bajo — solo por unos minutos.",
+  flash_cta: "Aprovechar oferta",
+  flash_ends: "La oferta termina en",
+  locked: "Bloqueado",
+  unlock_title: "Desbloquea esta lectura",
+  unlock_sub: "Obtén Aura Premium para acceso ilimitado a todos los cursos, rituales y lecturas.",
+  unlock_cta: "Desbloquear con Premium",
+  maybe_later: "Quizás luego",
+  profile: "Perfil",
+  purchase_history: "Historial de compras",
+  no_purchases: "Aún no hay compras",
+  member_since: "Miembro desde",
+  language: "Idioma",
+  privacy: "Política de Privacidad",
+  terms: "Términos de Uso",
+  premium_active: "Premium activo",
+  free_plan: "Plan gratuito",
+  best_value: "Mejor valor · ahorra 60%",
+  most_online: "La mayoría de los guías están en línea ahora",
+  consent_text: "Al continuar aceptas nuestros Términos y Política de Privacidad. Protegemos tus datos bajo GDPR y LGPD.",
+  insights_title: "Insights", read_more: "Leer más", read_less: "Ver menos",
+  notifications: "Notificaciones", notifications_on: "Notificaciones activadas", notifications_off: "Notificaciones desactivadas",
+  notifications_desc: "Recibe un aviso cuando una guía esté en línea o tenga algo para ti.",
+  notifications_test: "Enviar notificación de prueba", notifications_test_sent: "Enviada — revisa tu dispositivo",
 };
 
 // de/fr/it/hi fall back to English via spread (structure ready for translation)
 const DICTS = { en, pt, es, de: { ...en }, fr: { ...en }, it: { ...en }, hi: { ...en } };
 export const LANGS = ["en", "es", "pt", "hi", "de", "fr", "it"];
+
+// Date field order by locale. Only "en" (US convention) uses month-first —
+// every other locale here (pt/es/de/fr/it/hi) conventionally reads dates
+// day-first. Showing month-first fields with translated labels to a
+// day-first user is exactly how "02/06" gets misread as Feb 6 instead of
+// Jun 2, silently producing the wrong zodiac sign.
+export const DATE_ORDER = { en: "mdy" };
+export function dateOrder(lang) {
+  return DATE_ORDER[lang] || "dmy";
+}
 
 export function detectLang() {
   const url = new URLSearchParams(window.location.search).get("lang");
@@ -190,13 +326,46 @@ export function detectLang() {
   return LANGS.includes(pick) ? pick : "en";
 }
 
+// Region -> currency. Best-effort from the browser locale (no GeoIP call, so
+// no extra network dependency or privacy trade-off) — anything unmapped
+// falls back to USD, the universal default. Keep in sync with the backend's
+// SUPPORTED_CURRENCIES (server.py) — a currency listed here but not created
+// as a Stripe Price on the backend will itself fall back to USD there too.
+const REGION_CURRENCY = {
+  BR: "brl",
+  GB: "gbp", IE: "gbp",
+  DE: "eur", FR: "eur", IT: "eur", ES: "eur", PT: "eur", NL: "eur",
+  BE: "eur", AT: "eur", FI: "eur", GR: "eur",
+};
+
+export function detectCurrency() {
+  const url = new URLSearchParams(window.location.search).get("cur");
+  if (url) return url.toLowerCase();
+  const saved = localStorage.getItem("aura_currency");
+  if (saved) return saved;
+  const locale = navigator.language || "en-US";
+  const region = locale.split("-")[1]?.toUpperCase();
+  return (region && REGION_CURRENCY[region]) || "usd";
+}
+
+const MONEY_FMT = {
+  usd: (v) => `$${v}`, eur: (v) => `€${v}`, gbp: (v) => `£${v}`,
+  brl: (v) => `R$${v.replace(".", ",")}`,
+};
+
 const I18nCtx = createContext(null);
 
 export function I18nProvider({ children }) {
   const [lang, setLangState] = useState(detectLang());
+  const [currency, setCurrencyState] = useState(detectCurrency());
   const setLang = (l) => { localStorage.setItem("aura_lang", l); setLangState(l); };
+  const setCurrency = (c) => { localStorage.setItem("aura_currency", c); setCurrencyState(c); };
   const t = useMemo(() => (key) => (DICTS[lang] && DICTS[lang][key]) || en[key] || key, [lang]);
-  return <I18nCtx.Provider value={{ lang, setLang, t }}>{children}</I18nCtx.Provider>;
+  const money = (minor, cur = currency) => {
+    const val = (minor / 100).toFixed(2);
+    return (MONEY_FMT[cur] || MONEY_FMT.usd)(val);
+  };
+  return <I18nCtx.Provider value={{ lang, setLang, t, currency, setCurrency, money }}>{children}</I18nCtx.Provider>;
 }
 
 export const useI18n = () => useContext(I18nCtx);

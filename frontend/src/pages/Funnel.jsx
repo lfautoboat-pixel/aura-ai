@@ -2,8 +2,9 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Heart, Briefcase, Compass, Sparkles, MoreHorizontal, Moon, Sun, Star, Cloud, Hand, Check, Mail, Apple, ChevronLeft } from "lucide-react";
+import { GoogleLogin } from "@react-oauth/google";
 import api from "../api";
-import { useI18n } from "../i18n";
+import { useI18n, dateOrder } from "../i18n";
 import { useAuth } from "../store";
 import { Logo, Starfield, SIGN_GLYPH } from "../components/Cosmic";
 
@@ -23,7 +24,8 @@ function OptionCard({ icon: Icon, label, active, onClick, testid }) {
 
 export default function Funnel() {
   const nav = useNavigate();
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
+  const dmy = dateOrder(lang) === "dmy";
   const { user, login } = useAuth();
   const [s, setS] = useState(0);
   const [ans, setAns] = useState({});
@@ -53,7 +55,7 @@ export default function Funnel() {
     return () => clearInterval(id);
   }, [s]);
 
-  useEffect(() => { if (s === 8) api.get("/content/advisors").then((r) => setAdvisors(r.data)); }, [s]);
+  useEffect(() => { if (s === 8) api.get(`/content/advisors?lang=${lang}`).then((r) => setAdvisors(r.data)); }, [s, lang]);
 
   const requestOtp = async () => {
     if (!email.includes("@")) return;
@@ -79,18 +81,19 @@ export default function Funnel() {
     } catch { setCode(""); } finally { setSending(false); }
   };
 
-  const googleQuick = async () => {
+  const googleConfigured = !!process.env.REACT_APP_GOOGLE_CLIENT_ID;
+
+  const onGoogleSuccess = async (credentialResponse) => {
     setSending(true);
-    const guest = `seeker_${Math.random().toString(36).slice(2, 8)}@aura.ai`;
     try {
-      const { data } = await api.post("/auth/google", { email: guest, name: "Seeker" });
+      const { data } = await api.post("/auth/google", { credential: credentialResponse.credential });
       localStorage.setItem("aura_token", data.token);
       await api.post("/quiz", {
         gender: ans.gender, topic: ans.topic, reading_type: ans.reading,
         birth_month: ans.bm, birth_day: ans.bd, birth_year: ans.by,
       });
       login(data.token, data.user);
-      setS(8);
+      nav("/app");
     } finally { setSending(false); }
   };
 
@@ -167,18 +170,27 @@ export default function Funnel() {
               <h1 className="font-display text-3xl text-[#241b45] leading-tight">{t("q_dob")}</h1>
               <p className="text-[#6a5f8c]">{t("q_dob_sub")}</p>
               <div className="grid grid-cols-3 gap-3">
-                <select data-testid="dob-month" className="p-3 rounded-xl border border-[#eae4ff] bg-white text-[#2c2151]" value={ans.bm || ""} onChange={(e) => set("bm", +e.target.value)}>
-                  <option value="">{t("month")}</option>
-                  {months.map((m, i) => <option key={m} value={i + 1}>{m}</option>)}
-                </select>
-                <select data-testid="dob-day" className="p-3 rounded-xl border border-[#eae4ff] bg-white text-[#2c2151]" value={ans.bd || ""} onChange={(e) => set("bd", +e.target.value)}>
-                  <option value="">{t("day")}</option>
-                  {Array.from({ length: 31 }, (_, i) => i + 1).map((d) => <option key={d} value={d}>{d}</option>)}
-                </select>
-                <select data-testid="dob-year" className="p-3 rounded-xl border border-[#eae4ff] bg-white text-[#2c2151]" value={ans.by || ""} onChange={(e) => set("by", +e.target.value)}>
-                  <option value="">{t("year")}</option>
-                  {years.map((y) => <option key={y} value={y}>{y}</option>)}
-                </select>
+                {(() => {
+                  const monthSelect = (
+                    <select key="m" data-testid="dob-month" className="p-3 rounded-xl border border-[#eae4ff] bg-white text-[#2c2151]" value={ans.bm || ""} onChange={(e) => set("bm", +e.target.value)}>
+                      <option value="">{t("month")}</option>
+                      {months.map((m, i) => <option key={m} value={i + 1}>{m}</option>)}
+                    </select>
+                  );
+                  const daySelect = (
+                    <select key="d" data-testid="dob-day" className="p-3 rounded-xl border border-[#eae4ff] bg-white text-[#2c2151]" value={ans.bd || ""} onChange={(e) => set("bd", +e.target.value)}>
+                      <option value="">{t("day")}</option>
+                      {Array.from({ length: 31 }, (_, i) => i + 1).map((d) => <option key={d} value={d}>{d}</option>)}
+                    </select>
+                  );
+                  const yearSelect = (
+                    <select key="y" data-testid="dob-year" className="p-3 rounded-xl border border-[#eae4ff] bg-white text-[#2c2151]" value={ans.by || ""} onChange={(e) => set("by", +e.target.value)}>
+                      <option value="">{t("year")}</option>
+                      {years.map((y) => <option key={y} value={y}>{y}</option>)}
+                    </select>
+                  );
+                  return dmy ? [daySelect, monthSelect, yearSelect] : [monthSelect, daySelect, yearSelect];
+                })()}
               </div>
               <button data-testid="dob-continue" disabled={!ans.bm || !ans.bd || !ans.by} onClick={next}
                 className="w-full grad-btn text-white font-bold py-4 rounded-2xl disabled:opacity-40">{t("continue")}</button>
@@ -211,8 +223,8 @@ export default function Funnel() {
               <h1 className="font-display text-3xl text-[#241b45] mt-6">{t("offer_title")}</h1>
               <p className="text-[#6a5f8c] mt-3 px-4">{t("offer_sub")}</p>
               <div className="glass-light rounded-2xl p-5 mt-6 w-full">
-                <div className="text-[#7c5cff] font-bold text-lg">✦ 3:00 min</div>
-                <div className="text-[#6a5f8c] text-sm mt-1">{t("free_banner")} · no credit card</div>
+                <div className="text-[#7c5cff] font-bold text-lg">✦ {t("free_banner")}</div>
+                <div className="text-[#6a5f8c] text-sm mt-1">{t("no_card")}</div>
               </div>
               <button data-testid="offer-redeem" onClick={() => setS(6)} className="w-full grad-btn text-white font-bold py-4 rounded-2xl mt-6">{t("redeem")}</button>
             </motion.div>
@@ -222,10 +234,18 @@ export default function Funnel() {
             <motion.div key="profile" variants={step} initial="initial" animate="animate" exit="exit" className="space-y-5 pt-4">
               <h1 className="font-display text-3xl text-[#241b45] leading-tight">{t("profile_title")}</h1>
               <p className="text-[#6a5f8c]">{t("profile_sub")}</p>
-              <button data-testid="google-btn" onClick={googleQuick} className="w-full flex items-center justify-center gap-3 bg-white border border-[#eae4ff] font-semibold py-3.5 rounded-2xl text-[#2c2151]">
-                <img alt="g" src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20" /> {t("google_btn")}
-              </button>
-              <button data-testid="apple-btn" onClick={googleQuick} className="w-full flex items-center justify-center gap-3 bg-[#111] text-white font-semibold py-3.5 rounded-2xl">
+              {googleConfigured ? (
+                <div data-testid="google-btn" className="w-full [&>div]:!w-full flex justify-center rounded-2xl overflow-hidden">
+                  <GoogleLogin onSuccess={onGoogleSuccess} onError={() => {}} width="320" shape="pill" text="continue_with" />
+                </div>
+              ) : (
+                <button data-testid="google-btn" disabled title="Login com Google em configuração"
+                  className="w-full flex items-center justify-center gap-3 bg-white border border-[#eae4ff] font-semibold py-3.5 rounded-2xl text-[#2c2151]/40 cursor-not-allowed">
+                  <img alt="" src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20" className="opacity-40" /> {t("google_btn")}
+                </button>
+              )}
+              <button data-testid="apple-btn" disabled title="Apple Sign-In em breve"
+                className="w-full flex items-center justify-center gap-3 bg-[#111]/40 text-white/40 font-semibold py-3.5 rounded-2xl cursor-not-allowed">
                 <Apple size={18} /> {t("apple_btn")}
               </button>
               <div className="flex items-center gap-3 text-[#b3a9cc] text-xs"><div className="flex-1 h-px bg-[#eae4ff]" />or<div className="flex-1 h-px bg-[#eae4ff]" /></div>
@@ -235,6 +255,7 @@ export default function Funnel() {
                 className="w-full grad-btn text-white font-bold py-4 rounded-2xl disabled:opacity-40 flex items-center justify-center gap-2">
                 <Mail size={18} /> {t("email_btn")}
               </button>
+              <p className="text-[#9a90bd] text-[11px] text-center leading-relaxed">{t("consent_text")}</p>
             </motion.div>
           )}
 

@@ -1,0 +1,59 @@
+services:
+  - type: web
+    name: aura-ai-backend
+    runtime: python
+    plan: free
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn server:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: MONGO_URL
+        sync: false
+      - key: DB_NAME
+        value: aura_ai
+      - key: CORS_ORIGINS
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: DEV_MODE
+        value: "false"
+      - key: AURA_LLM_KEY
+        sync: false
+      - key: AURA_LLM_KEYS
+        # Optional, comma-separated (key1,key2,...). Takes priority over
+        # AURA_LLM_KEY when set. Each key must come from a SEPARATE free
+        # Google AI Studio project — keys from the same project share one
+        # 20 req/day quota pool, so same-project keys add zero capacity.
+        sync: false
+      - key: AURA_LLM_MODEL
+        # gemini-2.5-flash and other pinned names 404/429 on this key —
+        # gemini-flash-latest is the confirmed-working model (see HANDOFF.md).
+        value: gemini-flash-latest
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: BREVO_API_KEY
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: SENDER_EMAIL
+        sync: false
+      - key: SENDER_NAME
+        value: Aura AI
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_PUBLISHABLE_KEY
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
+      - key: STRIPE_MODE
+        sync: false
+      - key: STRIPE_ACCOUNT_ID
+        sync: false
+      - key: VAPID_PUBLIC_KEY
+        sync: false
+      - key: VAPID_PRIVATE_KEY_PEM
+        sync: false
+      - key: VAPID_SUBJECT
+        sync: false
+      - key: PUSH_SCHEDULER_ENABLED
+        value: "false"

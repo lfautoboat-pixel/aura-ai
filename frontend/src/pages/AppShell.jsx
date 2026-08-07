@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
-import { MessageCircle, Compass, Users, BookOpen, Gift, Sparkles, Star, Coins, Crown, Download, LogOut } from "lucide-react";
+import { useNavigate, useParams } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
+import { MessageCircle, Compass, Users, BookOpen, Gift, Sparkles, Star, Coins, Crown, Download, LogOut, ChevronDown, ChevronRight, User } from "lucide-react";
 import api from "../api";
 import { useI18n } from "../i18n";
 import { useAuth } from "../store";
@@ -23,34 +23,109 @@ function Header({ onInstall, installable }) {
         <button data-testid="credits-pill" onClick={() => nav("/app/recharge")} className="grad-btn rounded-full px-3 py-1.5 text-xs font-bold flex items-center gap-1 text-white">
           <Coins size={14} /> {user?.premium ? "∞" : ((user?.free_messages || 0) > 0 ? `${user.free_messages} free` : (user?.credits || 0))}
         </button>
+        <button data-testid="profile-btn" onClick={() => nav("/app/profile")} className="glass rounded-full p-0.5 shrink-0" title={t("profile")}>
+          {user?.picture ? (
+            <img src={user.picture} alt="" className="w-7 h-7 rounded-full object-cover" />
+          ) : (
+            <span className="w-7 h-7 rounded-full grad-btn grid place-items-center"><User size={14} className="text-white" /></span>
+          )}
+        </button>
         <button data-testid="logout-btn" onClick={logout} className="glass rounded-full p-2"><LogOut size={14} /></button>
       </div>
     </div>
   );
 }
 
+const STATUS_DOT = { online: "bg-emerald-400", busy: "bg-amber-400", offline: "bg-white/30" };
+const STATUS_TEXT = { online: "text-emerald-400", busy: "text-amber-400", offline: "text-white/40" };
+
 function GuidesView({ advisors }) {
   const { t } = useI18n();
   const nav = useNavigate();
+  const [filter, setFilter] = useState("all");
+
+  const specialties = ["all", ...Array.from(new Set(advisors.flatMap((a) => a.specialties || [])))];
+  const shown = filter === "all" ? advisors : advisors.filter((a) => (a.specialties || []).includes(filter));
+
   return (
     <div className="p-5 space-y-4">
       <h1 className="font-display text-3xl">{t("advisors_title")}</h1>
       <p className="text-white/60 text-sm">{t("advisors_sub")}</p>
+
+      <div className="flex gap-2 overflow-x-auto no-sb -mx-1 px-1 pb-1">
+        {specialties.map((s) => (
+          <button key={s} onClick={() => setFilter(s)} data-testid={`filter-${s}`}
+            className={`shrink-0 rounded-full px-4 py-2 text-xs font-semibold capitalize transition-colors ${filter === s ? "grad-btn text-white" : "glass text-white/60"}`}>
+            {s === "all" ? t("filter_all") : s}
+          </button>
+        ))}
+      </div>
+
       <div className="space-y-3">
-        {advisors.map((a, i) => (
+        {shown.map((a, i) => (
           <motion.div key={a.id} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06 }}
             className="glass rounded-2xl p-4 flex items-center gap-3" data-testid={`guide-${a.id}`}>
-            <div className="relative">
-              <img src={a.avatar} alt={a.name} className="w-16 h-16 rounded-2xl object-cover" />
-              {a.online && <span className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-emerald-400 border-2 border-[#0b0718]" />}
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="font-bold">{a.name}</div>
-              <div className="text-xs text-white/55 truncate">{a.title}</div>
-              <div className="text-xs mt-1 flex gap-2 text-[#e7c46a]">★ {a.rating} <span className="text-white/40">· {a.reviews} {t("reviews")} · {a.years} {t("years_exp")}</span></div>
-            </div>
+            <button onClick={() => nav(`/app/advisor/${a.id}`)} className="flex items-center gap-3 flex-1 min-w-0 text-left" data-testid={`guide-profile-${a.id}`}>
+              <div className="relative shrink-0">
+                <img src={a.avatar} alt={a.name} className="w-16 h-16 rounded-2xl object-cover" />
+                <span className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-[#0b0718] ${STATUS_DOT[a.status] || STATUS_DOT.offline}`} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="font-bold">{a.name}</div>
+                <div className="text-xs text-white/55 truncate">{a.title}</div>
+                <div className="text-xs mt-1 flex items-center gap-2 text-[#e7c46a]">
+                  ★ {a.rating} <span className="text-white/40">· {a.reviews} {t("reviews")} · {a.years} {t("years_exp")}</span>
+                  <span className={`font-semibold ${STATUS_TEXT[a.status] || STATUS_TEXT.offline}`}>· {t(a.status)}</span>
+                </div>
+              </div>
+              <ChevronRight size={16} className="text-white/25 shrink-0" />
+            </button>
             <button onClick={() => nav(`/app/chat/${a.id}`)} className="grad-btn text-white text-xs font-bold px-3 py-2 rounded-xl whitespace-nowrap" data-testid={`chat-btn-${a.id}`}>{t("start_chat")}</button>
           </motion.div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function InsightCard({ insight, open, onToggle }) {
+  const { t } = useI18n();
+  return (
+    <motion.div layout className="glass rounded-2xl overflow-hidden" data-testid={`insight-${insight.id}`}>
+      <button onClick={onToggle} className="w-full flex items-start gap-3 p-4 text-left" data-testid={`insight-toggle-${insight.id}`}>
+        <img src={insight.img} alt="" className="w-16 h-16 rounded-xl object-cover shrink-0" />
+        <div className="flex-1 min-w-0">
+          <div className="font-semibold text-sm leading-snug">{insight.title}</div>
+          <div className="text-xs text-white/50 mt-1 line-clamp-2">{insight.excerpt}</div>
+        </div>
+        <motion.div animate={{ rotate: open ? 180 : 0 }} transition={{ duration: 0.2 }} className="shrink-0 mt-1 text-white/40">
+          <ChevronDown size={16} />
+        </motion.div>
+      </button>
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.25, ease: "easeInOut" }} className="overflow-hidden">
+            <p className="px-4 pb-4 text-sm text-white/75 leading-relaxed font-serif2">{insight.body}</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  );
+}
+
+function InsightsSection({ insights }) {
+  const { t } = useI18n();
+  const [openId, setOpenId] = useState(null);
+  if (!insights?.length) return null;
+  return (
+    <div>
+      <h2 className="text-lg font-bold mb-3">{t("insights_title")}</h2>
+      <div className="space-y-3">
+        {insights.map((ins) => (
+          <InsightCard key={ins.id} insight={ins} open={openId === ins.id}
+            onToggle={() => setOpenId((id) => (id === ins.id ? null : ins.id))} />
         ))}
       </div>
     </div>
@@ -91,6 +166,7 @@ function DiscoverView({ data }) {
           ))}
         </div>
       </div>
+      <InsightsSection insights={data?.insights} />
     </div>
   );
 }
@@ -109,7 +185,7 @@ function ReadingsView({ data }) {
           <div className="font-display text-2xl mt-2">{sign}</div>
           <div className="text-white/60 text-xs mt-1">{t("your_sign")}</div>
           <p className="text-white/80 text-sm mt-4 font-serif2 text-[16px] leading-relaxed">
-            The moon favours quiet courage today. A conversation you've delayed carries the key — speak from the heart and the universe will meet you halfway.
+            {t("horoscope_daily")}
           </p>
         </div>
       )}
@@ -148,19 +224,41 @@ function RewardsView() {
 }
 
 function ChatsView({ advisors }) {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const nav = useNavigate();
+  const [threads, setThreads] = useState(null);
+
+  useEffect(() => {
+    api.get(`/chats?lang=${lang}`).then((r) => setThreads(r.data)).catch(() => setThreads([]));
+  }, [lang]);
+
+  if (threads === null) return <div className="p-5 text-white/40 text-sm">…</div>;
+
+  if (threads.length === 0) {
+    return (
+      <div className="p-5 space-y-4">
+        <h1 className="font-display text-3xl">{t("nav_chats")}</h1>
+        <div className="glass rounded-2xl p-6 text-center">
+          <p className="text-white/60 text-sm">{t("chats_empty")}</p>
+          <button onClick={() => nav("/app/guides")} className="grad-btn text-white text-sm font-bold px-4 py-2.5 rounded-xl mt-4">
+            {t("nav_guides")}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="p-5 space-y-4">
       <h1 className="font-display text-3xl">{t("nav_chats")}</h1>
       <div className="space-y-2">
-        {advisors.map((a) => (
+        {threads.map((a) => (
           <button key={a.id} onClick={() => nav(`/app/chat/${a.id}`)} data-testid={`chatlist-${a.id}`}
             className="w-full glass rounded-2xl p-3 flex items-center gap-3 text-left">
             <img src={a.avatar} alt={a.name} className="w-12 h-12 rounded-full object-cover" />
             <div className="flex-1 min-w-0">
               <div className="font-semibold">{a.name}</div>
-              <div className="text-xs text-white/50 truncate">Tap to continue your reading…</div>
+              <div className="text-xs text-white/50 truncate">{a.last_text}</div>
             </div>
             {a.online && <span className="text-[10px] text-emerald-400 font-bold">{t("online")}</span>}
           </button>
@@ -170,20 +268,23 @@ function ChatsView({ advisors }) {
   );
 }
 
+const VALID_TABS = ["chats", "discover", "guides", "readings", "rewards"];
+
 export default function AppShell() {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const { user, loading } = useAuth();
   const nav = useNavigate();
-  const [tab, setTab] = useState("guides");
+  const { tab: tabParam } = useParams();
+  const tab = VALID_TABS.includes(tabParam) ? tabParam : "guides";
   const [advisors, setAdvisors] = useState([]);
   const [discover, setDiscover] = useState(null);
   const [deferred, setDeferred] = useState(null);
 
   useEffect(() => { if (!loading && !user) nav("/"); }, [loading, user, nav]);
   useEffect(() => {
-    api.get("/content/advisors").then((r) => setAdvisors(r.data));
-    api.get("/content/discover").then((r) => setDiscover(r.data));
-  }, []);
+    api.get(`/content/advisors?lang=${lang}`).then((r) => setAdvisors(r.data));
+    api.get(`/content/discover?lang=${lang}`).then((r) => setDiscover(r.data));
+  }, [lang]);
   useEffect(() => {
     const h = (e) => { e.preventDefault(); setDeferred(e); };
     window.addEventListener("beforeinstallprompt", h);
@@ -214,7 +315,7 @@ export default function AppShell() {
 
       <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] z-30 glass border-t border-white/10 flex justify-around px-2 py-2.5" style={{ paddingBottom: "max(10px, env(safe-area-inset-bottom))" }}>
         {tabs.map(([k, Icon, label]) => (
-          <button key={k} onClick={() => setTab(k)} data-testid={`nav-${k}`}
+          <button key={k} onClick={() => nav(`/app/${k}`)} data-testid={`nav-${k}`}
             className={`flex flex-col items-center gap-1 px-2 py-1 rounded-xl transition-colors ${tab === k ? "text-[#b79cff]" : "text-white/45"}`}>
             <Icon size={21} />
             <span className="text-[10px] font-medium">{label}</span>

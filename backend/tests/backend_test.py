@@ -1,14 +1,16 @@
 """Backend regression tests for Aura AI"""
 import os
 import time
+from pathlib import Path
 import requests
 import pytest
 
-BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://aura-connect-36.preview.emergentagent.com').rstrip('/')
-# Load frontend .env explicitly since REACT_APP_BACKEND_URL isn't in os env by default here
-if 'aura' not in BASE_URL:
-    with open('/app/frontend/.env') as f:
-        for line in f:
+BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'http://localhost:8001').rstrip('/')
+# Fall back to reading the frontend .env directly if the env var isn't set in this shell.
+if not os.environ.get('REACT_APP_BACKEND_URL'):
+    frontend_env = Path(__file__).resolve().parents[2] / 'frontend' / '.env'
+    if frontend_env.exists():
+        for line in frontend_env.read_text().splitlines():
             if line.startswith('REACT_APP_BACKEND_URL='):
                 BASE_URL = line.split('=', 1)[1].strip().rstrip('/')
 
