@@ -247,43 +247,192 @@ SEED_ADVISORS = [
      "persona_pt": "Freya Sunstrom, uma leitora de cartas-oráculo e anjos luminosa e encorajadora, que responde a pergunta por trás da pergunta."},
 ]
 
+C1_LESSONS = [
+    {"title": "The First 48 Hours", "title_pt": "As Primeiras 48 Horas",
+     "body": "The instinct after a break-up is to fix the feeling immediately — distract, explain, replay, reach out. Don't. The first 48 hours aren't for solving anything; they're for letting the nervous system register that something real ended. Cry if it comes. Sleep if you can. Don't make decisions, don't send the text you're rehearsing. You have permission to feel this exactly as badly as you feel it, for exactly as long as it takes — grief on a deadline isn't grief, it's suppression with a schedule.",
+     "body_pt": "O instinto depois de um término é resolver o sentimento na hora — distrair, explicar, reviver, procurar a pessoa. Não faça isso. As primeiras 48 horas não são para resolver nada; são para o sistema nervoso registrar que algo real terminou. Chore se vier. Durma se conseguir. Não tome decisões, não mande a mensagem que você está ensaiando. Você tem permissão de sentir exatamente tão mal quanto sente, pelo tempo que precisar — luto com prazo não é luto, é supressão com cronograma."},
+    {"title": "Why Your Brain Keeps Replaying It", "title_pt": "Por Que Sua Mente Fica Revivendo Tudo",
+     "body": "The looping — the same conversation, the same what-if, on repeat — isn't a character flaw, it's your brain trying to find the moment it could have changed the outcome, because unresolved things get more mental real estate than resolved ones. The loop won't stop because you 'figure it out'; it stops when you stop needing an answer to feel safe. Try this: when it starts, name it out loud — 'I'm looping again' — and physically stand up. Interrupting the body interrupts the loop faster than out-arguing it in your head ever will.",
+     "body_pt": "O loop mental — a mesma conversa, o mesmo 'e se', em repetição — não é um defeito seu, é sua mente tentando achar o momento em que poderia ter mudado o resultado, porque coisas não resolvidas ocupam mais espaço mental do que as resolvidas. O loop não para porque você 'descobre a resposta'; ele para quando você para de precisar de uma resposta pra se sentir segura. Tente isso: quando começar, nomeie em voz alta — 'estou em loop de novo' — e levante-se fisicamente. Interromper o corpo interrompe o loop mais rápido do que discutir com ele na sua cabeça."},
+    {"title": "Rebuilding Your Own Orbit", "title_pt": "Reconstruindo Sua Própria Órbita",
+     "body": "Long relationships quietly merge routines, playlists, even opinions. Losing that isn't just losing a person — it's losing the shape of your days. Don't rush to fill it with someone new; fill it with something that's undeniably, only yours. One meal you used to skip because they didn't like it. One route you used to avoid. Reclaiming small, specific things does more for identity than any big gesture — it proves, in a way you can feel, that your life still belongs to you.",
+     "body_pt": "Relacionamentos longos misturam, sem perceber, rotinas, playlists, até opiniões. Perder isso não é só perder uma pessoa — é perder o formato dos seus dias. Não corra pra preencher com outra pessoa; preencha com algo que é inegavelmente só seu. Uma comida que você deixava de comer porque a outra pessoa não gostava. Um caminho que você evitava. Reconquistar coisas pequenas e específicas faz mais pela sua identidade do que qualquer gesto grande — prova, de um jeito que dá pra sentir, que sua vida ainda é sua."},
+    {"title": "Closure Without Needing a Reply", "title_pt": "Fechamento Sem Precisar de Resposta",
+     "body": "Most people wait for the other person to provide closure — an explanation, an apology, a clean conversation. It rarely comes, and waiting for it hands them the last word on your own healing. Closure is something you're allowed to build yourself: write the letter you'll never send, say out loud the sentence you needed to hear, then physically close something — a box, a drawer, a tab. The universe doesn't owe you an ending that makes narrative sense. You're allowed to write your own.",
+     "body_pt": "A maioria das pessoas espera que a outra parte dê o fechamento — uma explicação, um pedido de desculpas, uma conversa limpa. Raramente isso vem, e esperar por ele entrega a última palavra da sua própria cura pra outra pessoa. Fechamento é algo que você pode construir sozinha: escreva a carta que nunca vai enviar, diga em voz alta a frase que precisava ouvir, depois feche algo fisicamente — uma caixa, uma gaveta, uma aba. O universo não te deve um final que faça sentido narrativo. Você pode escrever o seu."},
+]
+C2_LESSONS = [
+    {"title": "What 'Feminine Energy' Actually Means", "title_pt": "O Que 'Energia Feminina' Realmente Significa",
+     "body": "Feminine energy gets reduced to softness or passivity, and that's a disservice to what it actually is: receptivity. It's the capacity to sense what's true before you can explain why, to let things arrive instead of forcing them, to lead with intuition alongside logic instead of overriding it. It has nothing to do with how you dress or how quiet you are — some of the most 'feminine-energy-aligned' people you'll meet are loud, direct and impossible to overlook. This isn't about becoming someone softer. It's about trusting the parts of you that already know things your logic hasn't caught up to yet.",
+     "body_pt": "Energia feminina costuma ser reduzida a suavidade ou passividade, e isso é um desserviço ao que ela realmente é: receptividade. É a capacidade de sentir o que é verdadeiro antes de conseguir explicar por quê, de deixar as coisas chegarem em vez de forçá-las, de liderar com intuição junto da lógica em vez de anulá-la. Não tem nada a ver com como você se veste ou o quão quieta você é — algumas das pessoas mais 'alinhadas com energia feminina' que você vai conhecer são barulhentas, diretas e impossíveis de ignorar. Isso não é sobre virar alguém mais suave. É sobre confiar nas partes de você que já sabem coisas que sua lógica ainda não alcançou."},
+    {"title": "The Body as the First Signal", "title_pt": "O Corpo Como Primeiro Sinal",
+     "body": "Intuition rarely arrives as a clear sentence in your head — it arrives in the body first: a tightening before you know why, a lightness before you've decided anything. Most of us are trained to override that signal in favor of what sounds reasonable. Try this for one week: before making any decision, big or small, pause and notice what happens in your chest and stomach before you think about it. You're not looking for magic. You're re-learning a language your body never stopped speaking.",
+     "body_pt": "A intuição raramente chega como uma frase clara na cabeça — ela chega no corpo primeiro: um aperto antes de você saber por quê, uma leveza antes de você ter decidido qualquer coisa. A maioria de nós foi treinada pra anular esse sinal em favor do que soa razoável. Experimente por uma semana: antes de tomar qualquer decisão, grande ou pequena, pare e note o que acontece no seu peito e estômago antes de pensar sobre isso. Você não está procurando magia. Está reaprendendo uma língua que seu corpo nunca parou de falar."},
+    {"title": "Boundaries Are a Feminine Practice Too", "title_pt": "Limites Também São uma Prática Feminina",
+     "body": "Boundaries get filed under 'masculine' or 'harsh,' but a boundary stated calmly, without justification or apology, is one of the purest expressions of receptivity there is — it's you honoring what you actually feel instead of managing what someone else might feel about it. A soft no is still a complete no. Practice one this week: say it without over-explaining, without softening it into three sentences of context nobody asked for. Notice how much energy you get back the moment you stop auditioning for permission to have a limit.",
+     "body_pt": "Limites costumam ser classificados como 'masculinos' ou 'ríspidos', mas um limite dito com calma, sem justificativa ou pedido de desculpas, é uma das expressões mais puras de receptividade que existe — é você honrando o que realmente sente em vez de administrar o que a outra pessoa pode sentir sobre isso. Um não suave ainda é um não completo. Pratique um esta semana: diga sem explicar demais, sem amaciar em três frases de contexto que ninguém pediu. Repare quanta energia volta pra você no momento em que você para de pedir permissão pra ter um limite."},
+    {"title": "A 10-Minute Evening Ritual", "title_pt": "Um Ritual Noturno de 10 Minutos",
+     "body": "Feminine energy is cyclical, not constant — it needs a real close to the day, not just a slide into sleep with a screen in your hand. Try this: light something (a candle is enough), write three lines about what your body felt today — not what happened, what it felt — then name one thing you're releasing before tomorrow. It takes ten minutes. The ritual isn't the candle or the notebook; it's the ten minutes where nothing is being produced, achieved, or optimized — just felt.",
+     "body_pt": "Energia feminina é cíclica, não constante — precisa de um fechamento real do dia, não só um deslize pro sono com uma tela na mão. Experimente: acenda algo (uma vela já basta), escreva três linhas sobre o que seu corpo sentiu hoje — não o que aconteceu, o que sentiu — depois nomeie uma coisa que você está soltando antes de amanhã. Leva dez minutos. O ritual não é a vela nem o caderno; são os dez minutos em que nada está sendo produzido, conquistado ou otimizado — só sentido."},
+]
+
 SEED_COURSES = [
-    {"id": "c1", "title": "Break-up Recovery Kit", "title_pt": "Kit de Superação do Término", "lessons": 8, "locked": False,
-     "img": "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=400&q=80"},
-    {"id": "c2", "title": "Awaken Feminine Energy", "title_pt": "Desperte a Energia Feminina", "lessons": 6, "locked": False,
-     "img": "https://images.unsplash.com/photo-1499209974431-9dddcece7f88?w=400&q=80"},
+    {"id": "c1", "title": "Break-up Recovery Kit", "title_pt": "Kit de Superação do Término", "lessons": 4, "locked": False,
+     "img": "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=400&q=80", "lessons_content": C1_LESSONS},
+    {"id": "c2", "title": "Awaken Feminine Energy", "title_pt": "Desperte a Energia Feminina", "lessons": 4, "locked": False,
+     "img": "https://images.unsplash.com/photo-1499209974431-9dddcece7f88?w=400&q=80", "lessons_content": C2_LESSONS},
     {"id": "c3", "title": "Manifestation Mastery", "title_pt": "Domínio da Manifestação", "lessons": 10, "locked": True,
+     "teaser": "Turn vague wanting into a plan the universe can meet you halfway on.",
+     "teaser_pt": "Transforme um desejo vago num plano que o universo consiga encontrar no meio do caminho.",
      "img": "https://images.unsplash.com/photo-1502134249126-9f3755a50d78?w=400&q=80"},
     {"id": "c4", "title": "Chakra Sound Healing", "title_pt": "Cura Sonora dos Chakras", "lessons": 7, "locked": True,
+     "teaser": "Frequency-based practices to release what's stuck before it becomes a pattern.",
+     "teaser_pt": "Práticas sonoras pra soltar o que está travado antes que vire padrão.",
      "img": "https://images.unsplash.com/photo-1519834785169-98be25ec3f84?w=400&q=80"},
     {"id": "c5", "title": "Shadow Work Journey", "title_pt": "Jornada de Trabalho da Sombra", "lessons": 9, "locked": True,
+     "teaser": "The parts of yourself you edited out are still running the show — meet them on purpose.",
+     "teaser_pt": "As partes de você que foram editadas ainda estão no comando — encontre-as de propósito.",
      "img": "https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?w=400&q=80"},
     {"id": "c6", "title": "Moon Phases & Rituals", "title_pt": "Fases da Lua & Rituais", "lessons": 8, "locked": True,
+     "teaser": "A practice for every phase — when to start, when to release, when to simply rest.",
+     "teaser_pt": "Uma prática pra cada fase — quando começar, quando soltar, quando só descansar.",
      "img": "https://images.unsplash.com/photo-1532693322450-2cb5c511067d?w=400&q=80"},
     {"id": "c7", "title": "Tarot for Beginners", "title_pt": "Tarô para Iniciantes", "lessons": 12, "locked": True,
+     "teaser": "Read your first spread with real confidence — the 78 cards, decoded plainly.",
+     "teaser_pt": "Leia sua primeira tiragem com confiança de verdade — as 78 cartas, decodificadas sem enrolação.",
      # Original photo-1601412436255-c8ea6cf29e69 404s (verified 2026-08) — swapped for a working image.
      "img": "https://images.unsplash.com/photo-1519791883288-dc8bd696e667?w=400&q=80"},
     {"id": "c8", "title": "Twin Flame Connection", "title_pt": "Conexão de Chama Gêmea", "lessons": 6, "locked": True,
+     "teaser": "The difference between a twin flame and a familiar wound wearing a disguise.",
+     "teaser_pt": "A diferença entre uma chama gêmea e uma ferida familiar disfarçada.",
      "img": "https://images.unsplash.com/photo-1518895949257-7621c3c786d7?w=400&q=80"},
+]
+
+Q1_QUESTIONS = [
+    {"q": "It's a free evening. Where do you actually want to be?", "q_pt": "Uma noite livre. Onde você realmente quer estar?",
+     "options": [
+        {"label": "In the kitchen, making something from scratch", "label_pt": "Na cozinha, fazendo algo do zero", "type": "kitchen"},
+        {"label": "Outside, hands in soil or surrounded by plants", "label_pt": "Lá fora, com as mãos na terra ou cercada de plantas", "type": "green"},
+        {"label": "Alone, lights low, journal open", "label_pt": "Sozinha, luz baixa, diário aberto", "type": "moon"},
+        {"label": "Home, candles lit, making the space feel like yours", "label_pt": "Em casa, velas acesas, deixando o espaço com a sua cara", "type": "hearth"}]},
+    {"q": "A friend is going through something hard. Your instinct is to:", "q_pt": "Uma amiga está passando por algo difícil. Seu instinto é:",
+     "options": [
+        {"label": "Show up with food — comfort through the senses", "label_pt": "Aparecer com comida — conforto pelos sentidos", "type": "kitchen"},
+        {"label": "Take her outside — a walk fixes more than talking", "label_pt": "Levar ela pra fora — uma caminhada resolve mais que conversa", "type": "green"},
+        {"label": "Sit with the silence, no need to fix it", "label_pt": "Ficar no silêncio junto, sem precisar consertar", "type": "moon"},
+        {"label": "Make her a space to land — tea, blanket, no rush", "label_pt": "Criar um espaço pra ela pousar — chá, cobertor, sem pressa", "type": "hearth"}]},
+    {"q": "Your power object would most likely be:", "q_pt": "Seu objeto de poder provavelmente seria:",
+     "options": [
+        {"label": "A well-used wooden spoon", "label_pt": "Uma colher de pau bem usada", "type": "kitchen"},
+        {"label": "A pressed flower or a jar of herbs", "label_pt": "Uma flor prensada ou um pote de ervas", "type": "green"},
+        {"label": "A mirror or a piece of moonstone", "label_pt": "Um espelho ou uma pedra-da-lua", "type": "moon"},
+        {"label": "A candle that's burned down halfway", "label_pt": "Uma vela já pela metade", "type": "hearth"}]},
+    {"q": "What drains you fastest?", "q_pt": "O que te esgota mais rápido?",
+     "options": [
+        {"label": "A kitchen I can't make my own", "label_pt": "Uma cozinha que não é do meu jeito", "type": "kitchen"},
+        {"label": "Too many days without going outside", "label_pt": "Muitos dias sem sair", "type": "green"},
+        {"label": "Constant noise, no time alone", "label_pt": "Barulho constante, sem tempo sozinha", "type": "moon"},
+        {"label": "A home that doesn't feel lived-in", "label_pt": "Uma casa que não parece habitada de verdade", "type": "hearth"}]},
+    {"q": "Your ideal kind of magic is:", "q_pt": "Sua magia ideal é:",
+     "options": [
+        {"label": "Practical — a remedy, a recipe, something you can use", "label_pt": "Prática — um remédio, uma receita, algo que se usa", "type": "kitchen"},
+        {"label": "Grown — patience, seasons, things that take time", "label_pt": "Cultivada — paciência, estações, coisas que levam tempo", "type": "green"},
+        {"label": "Inward — dreams, cycles, what the night reveals", "label_pt": "Interior — sonhos, ciclos, o que a noite revela", "type": "moon"},
+        {"label": "Domestic — protection, warmth, making a space sacred", "label_pt": "Doméstica — proteção, aconchego, tornar um espaço sagrado", "type": "hearth"}]},
+]
+Q1_RESULTS = [
+    {"key": "kitchen", "title": "The Kitchen Witch", "title_pt": "A Bruxa da Cozinha",
+     "desc": "Your magic is tactile — it lives in what you can stir, season and share. You believe (correctly) that a meal made with real intention is its own kind of spell. Your gift is turning the ordinary — dinner, tea, a shared table — into something that quietly heals people without them noticing it happened.",
+     "desc_pt": "Sua magia é tátil — vive no que se mexe, tempera e divide. Você acredita (com razão) que uma refeição feita com intenção real é um tipo de feitiço. Seu dom é transformar o comum — o jantar, o chá, a mesa compartilhada — em algo que cura as pessoas sem que elas percebam que aconteceu."},
+    {"key": "green", "title": "The Green Witch", "title_pt": "A Bruxa Verde",
+     "desc": "You're tuned to growth cycles most people walk past without noticing. Plants, seasons, patience — your practice is rooted (literally) in the natural world's own timing. Your gift is knowing that not everything can be rushed, and having the discipline to let things take exactly as long as they need to.",
+     "desc_pt": "Você está sintonizada com ciclos de crescimento que a maioria passa sem notar. Plantas, estações, paciência — sua prática é enraizada (literalmente) no próprio ritmo da natureza. Seu dom é saber que nem tudo pode ser apressado, e ter a disciplina de deixar as coisas levarem exatamente o tempo que precisam."},
+    {"key": "moon", "title": "The Moon Witch", "title_pt": "A Bruxa da Lua",
+     "desc": "Your practice lives inward — dreams, cycles, the parts of yourself that only show up in quiet. You process the world by feeling it fully before naming it, which can look like withdrawal but is actually depth. Your gift is a kind of self-knowledge most people spend their whole lives avoiding.",
+     "desc_pt": "Sua prática vive por dentro — sonhos, ciclos, as partes de você que só aparecem no silêncio. Você processa o mundo sentindo por completo antes de nomear, o que pode parecer isolamento mas na verdade é profundidade. Seu dom é um autoconhecimento que a maioria evita a vida inteira."},
+    {"key": "hearth", "title": "The Hearth Witch", "title_pt": "A Bruxa do Lar",
+     "desc": "You practice through the space you build — the home that feels different the moment someone walks into it. Warmth, protection, ritual woven into ordinary domestic life. Your gift is making a room feel safe without anyone being able to say exactly why.",
+     "desc_pt": "Você pratica através do espaço que constrói — a casa que parece diferente assim que alguém entra. Aconchego, proteção, ritual tecido na vida doméstica comum. Seu dom é fazer um ambiente parecer seguro sem ninguém saber dizer exatamente por quê."},
+]
+
+Q2_QUESTIONS = [
+    {"q": "Someone you love is in pain. You feel called to:", "q_pt": "Alguém que você ama está sofrendo. Você se sente chamada a:",
+     "options": [
+        {"label": "Hold space and help them process it", "label_pt": "Segurar espaço e ajudar a processar", "type": "healer"},
+        {"label": "Understand why it's really happening", "label_pt": "Entender por que isso está realmente acontecendo", "type": "seer"},
+        {"label": "Get them out of that environment entirely", "label_pt": "Tirar a pessoa completamente daquele ambiente", "type": "wanderer"},
+        {"label": "Protect what matters to them from getting worse", "label_pt": "Proteger o que importa pra pessoa de piorar", "type": "keeper"}]},
+    {"q": "You feel most yourself when:", "q_pt": "Você se sente mais você mesma quando:",
+     "options": [
+        {"label": "Someone finally feels understood because of you", "label_pt": "Alguém finalmente se sente compreendido por sua causa", "type": "healer"},
+        {"label": "You notice the thing nobody else saw coming", "label_pt": "Você percebe o que ninguém mais viu chegando", "type": "seer"},
+        {"label": "You're somewhere new, with no fixed plan", "label_pt": "Você está em um lugar novo, sem plano fixo", "type": "wanderer"},
+        {"label": "Something you built is still standing, intact", "label_pt": "Algo que você construiu ainda está de pé, intacto", "type": "keeper"}]},
+    {"q": "Your recurring dreams tend to involve:", "q_pt": "Seus sonhos recorrentes costumam envolver:",
+     "options": [
+        {"label": "People you need to help or comfort", "label_pt": "Pessoas que você precisa ajudar ou confortar", "type": "healer"},
+        {"label": "Symbols and messages you wake up trying to decode", "label_pt": "Símbolos e mensagens que você acorda tentando decifrar", "type": "seer"},
+        {"label": "Travel, movement, unfamiliar places", "label_pt": "Viagem, movimento, lugares desconhecidos", "type": "wanderer"},
+        {"label": "A home, a family, something worth defending", "label_pt": "Uma casa, uma família, algo que vale defender", "type": "keeper"}]},
+    {"q": "What do people come to you for, without you asking?", "q_pt": "Pelo que as pessoas te procuram, sem você pedir?",
+     "options": [
+        {"label": "To feel less alone in something hard", "label_pt": "Pra se sentir menos sozinhas em algo difícil", "type": "healer"},
+        {"label": "A read on a situation they can't see clearly", "label_pt": "Uma leitura de uma situação que não conseguem ver claro", "type": "seer"},
+        {"label": "The push to finally make a change", "label_pt": "O empurrão pra finalmente mudar algo", "type": "wanderer"},
+        {"label": "Steadiness — you're who they call in a crisis", "label_pt": "Estabilidade — você é quem chamam numa crise", "type": "keeper"}]},
+    {"q": "Your biggest fear, if you're honest, is:", "q_pt": "Seu maior medo, sendo honesta, é:",
+     "options": [
+        {"label": "Not being able to ease someone's pain", "label_pt": "Não conseguir aliviar a dor de alguém", "type": "healer"},
+        {"label": "Seeing something true and not being believed", "label_pt": "Ver algo verdadeiro e não ser acreditada", "type": "seer"},
+        {"label": "Staying somewhere too long and losing yourself", "label_pt": "Ficar em algum lugar tempo demais e se perder", "type": "wanderer"},
+        {"label": "Something you protect falling apart on your watch", "label_pt": "Algo que você protege desmoronar sob seus cuidados", "type": "keeper"}]},
+]
+Q2_RESULTS = [
+    {"key": "healer", "title": "The Healer", "title_pt": "A Curandeira",
+     "desc": "You're wired to sense pain before it's spoken and sit with it without flinching. Your path isn't about having answers — it's about presence so steady that people finally feel safe enough to fall apart, and then rebuild.",
+     "desc_pt": "Você é feita pra sentir a dor antes de ela ser dita e ficar com ela sem se afastar. Seu caminho não é sobre ter respostas — é sobre uma presença tão firme que as pessoas finalmente se sentem seguras pra desmoronar, e depois se reconstruir."},
+    {"key": "seer", "title": "The Seer", "title_pt": "A Vidente",
+     "desc": "You notice the pattern before anyone names it. Your gift isn't prediction — it's clarity, the ability to see a situation for what it actually is while everyone else is still arguing about what they wish it were.",
+     "desc_pt": "Você percebe o padrão antes de qualquer um nomear. Seu dom não é previsão — é clareza, a capacidade de ver uma situação pelo que ela realmente é enquanto todo mundo ainda discute o que gostaria que fosse."},
+    {"key": "wanderer", "title": "The Wanderer", "title_pt": "A Andarilha",
+     "desc": "You're not built to stay still, and that's not restlessness — it's how you learn. Every place you pass through leaves something in you and takes something you didn't need anymore. Your path is movement itself, not a destination.",
+     "desc_pt": "Você não foi feita pra ficar parada, e isso não é inquietação — é como você aprende. Todo lugar por onde passa deixa algo em você e leva algo que você não precisava mais. Seu caminho é o movimento em si, não um destino."},
+    {"key": "keeper", "title": "The Keeper", "title_pt": "A Guardiã",
+     "desc": "You hold things together — people, homes, traditions — often without being thanked for the weight of it. Your path is quiet strength: the reason something fragile survived wasn't luck, it was you standing in front of it.",
+     "desc_pt": "Você mantém as coisas de pé — pessoas, lares, tradições — muitas vezes sem ser agradecida pelo peso disso. Seu caminho é força silenciosa: a razão de algo frágil ter sobrevivido não foi sorte, foi você na frente dele."},
 ]
 
 SEED_QUIZZES = [
     {"id": "q1", "title": "What is your Witch Type?", "title_pt": "Qual é o seu Tipo de Bruxa?", "locked": False,
-     "img": "https://images.unsplash.com/photo-1509909756405-be0199881695?w=400&q=80"},
+     "img": "https://images.unsplash.com/photo-1509909756405-be0199881695?w=400&q=80",
+     "questions": Q1_QUESTIONS, "results": Q1_RESULTS},
     {"id": "q2", "title": "What is your Shamanic Path?", "title_pt": "Qual é o seu Caminho Xamânico?", "locked": False,
-     "img": "https://images.unsplash.com/photo-1465101162946-4377e57745c3?w=400&q=80"},
+     "img": "https://images.unsplash.com/photo-1465101162946-4377e57745c3?w=400&q=80",
+     "questions": Q2_QUESTIONS, "results": Q2_RESULTS},
     {"id": "q3", "title": "What is your Spirit Animal?", "title_pt": "Qual é o seu Animal de Poder?", "locked": True,
+     "teaser": "The animal that keeps appearing in your life isn't a coincidence.",
+     "teaser_pt": "O animal que continua aparecendo na sua vida não é coincidência.",
      "img": "https://images.unsplash.com/photo-1425082661705-1834bfd09dca?w=400&q=80"},
     {"id": "q4", "title": "How compatible are you?", "title_pt": "Qual sua Compatibilidade Amorosa?", "locked": True,
+     "teaser": "What actually makes two charts work — beyond sun sign compatibility charts.",
+     "teaser_pt": "O que realmente faz dois mapas funcionarem — além das tabelas genéricas de compatibilidade.",
      "img": "https://images.unsplash.com/photo-1518895949257-7621c3c786d7?w=400&q=80"},
     {"id": "q5", "title": "What is Blocking Your Abundance?", "title_pt": "O que Bloqueia sua Abundância?", "locked": True,
+     "teaser": "The exact belief quietly capping what you let yourself receive.",
+     "teaser_pt": "A crença exata que está limitando, em silêncio, o que você se permite receber.",
      # Original photo-1611974765270-eb6494cc5ca9 404s (verified 2026-08) — swapped for a working image.
      "img": "https://images.unsplash.com/photo-1580519542036-c47de6196ba5?w=400&q=80"},
     {"id": "q6", "title": "What is Your Moon Sign?", "title_pt": "Qual é o seu Signo Lunar?", "locked": True,
+     "teaser": "Your sun sign is who you show the world. Your moon sign is who you are at 2am.",
+     "teaser_pt": "Seu signo solar é quem você mostra ao mundo. Seu signo lunar é quem você é às 2h da manhã.",
      "img": "https://images.unsplash.com/photo-1532693322450-2cb5c511067d?w=400&q=80"},
     {"id": "q7", "title": "What is Your Love Language?", "title_pt": "Qual é a sua Linguagem do Amor?", "locked": True,
+     "teaser": "Why you keep feeling unloved by people who insist they love you.",
+     "teaser_pt": "Por que você continua se sentindo mal amada por pessoas que insistem que te amam.",
      "img": "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=400&q=80"},
     {"id": "q8", "title": "What Does Your Aura Color Mean?", "title_pt": "O que a Cor da sua Aura Revela?", "locked": True,
+     "teaser": "The color people unconsciously associate with you — and what it says about this season of your life.",
+     "teaser_pt": "A cor que as pessoas associam a você sem perceber — e o que ela diz sobre esta fase da sua vida.",
      "img": "https://images.unsplash.com/photo-1604881991720-f91add269bed?w=400&q=80"},
 ]
 
@@ -334,6 +483,20 @@ SEED_INSIGHTS = [
      "body": "A common misconception treats tarot like a weather forecast — a fixed outcome waiting to happen. Most experienced readers see it differently: the cards reflect the patterns, fears and momentum already present in a situation, which shapes what's likely, not what's fixed. That's why the same spread read a month apart can look completely different — because you, and your choices in between, changed what the cards had to say.",
      "body_pt": "Um equívoco comum trata o tarô como previsão do tempo — um resultado fixo esperando para acontecer. A maioria dos leitores experientes vê de outro jeito: as cartas refletem os padrões, medos e o momento já presentes numa situação, o que molda o que é provável, não o que é fixo. Por isso a mesma tiragem lida um mês depois pode parecer completamente diferente — porque você, e suas escolhas nesse meio-tempo, mudaram o que as cartas tinham a dizer.",
      "img": "https://images.unsplash.com/photo-1600431521340-491eca880813?w=500&q=80&fit=crop"},
+    {"id": "i7", "title": "The Difference Between Manifesting and Denial",
+     "title_pt": "A Diferença Entre Manifestar e Negar a Realidade",
+     "excerpt": "Manifesting isn't pretending the bad thing didn't happen. It's deciding what happens next.",
+     "excerpt_pt": "Manifestar não é fingir que o problema não aconteceu. É decidir o que vem depois.",
+     "body": "A common trap: manifestation gets used to skip feeling something hard, dressed up as positivity — 'I don't dwell on it, I just manifest better.' That's not manifesting, it's avoidance with better branding. Real manifestation starts after the hard feeling, not instead of it: you feel the disappointment fully, then consciously choose what you're building next. Skipping the first step doesn't make you more powerful — it just means the unfelt feeling resurfaces later, usually at a worse time.",
+     "body_pt": "Uma armadilha comum: manifestação é usada pra pular um sentimento difícil, disfarçada de positividade — 'eu não fico remoendo, eu só manifesto coisa melhor'. Isso não é manifestar, é evitação com marketing melhor. Manifestação de verdade começa depois do sentimento difícil, não no lugar dele: você sente a decepção por completo, depois escolhe conscientemente o que vai construir a seguir. Pular a primeira etapa não te torna mais poderosa — só significa que o sentimento não sentido volta depois, geralmente numa hora pior.",
+     "img": "https://images.unsplash.com/photo-1470252649378-9c29740c9fa8?w=500&q=80&fit=crop"},
+    {"id": "i8", "title": "The Ritual of Letting Go (And Why It Has to Be Physical)",
+     "title_pt": "O Ritual de Soltar (E Por Que Ele Precisa Ser Físico)",
+     "excerpt": "Deciding to let go in your head rarely works. Your body needs its own version of the memo.",
+     "excerpt_pt": "Decidir soltar algo só na cabeça raramente funciona. Seu corpo precisa da própria versão do recado.",
+     "body": "Thinking 'I'm letting this go' rarely convinces the nervous system of anything — thoughts are cheap, and the body knows it. That's why physical release rituals work better than mental ones: write it down and burn the paper, throw a stone into water, exhale hard and audibly on purpose. The content of the ritual matters less than the fact that it's physical, deliberate, and has a clear end point. Your body needs proof the thing is actually over — not another thought promising it is.",
+     "body_pt": "Pensar 'estou soltando isso' raramente convence o sistema nervoso de nada — pensamento é barato, e o corpo sabe disso. Por isso rituais de liberação físicos funcionam melhor que os mentais: escreva e queime o papel, jogue uma pedra na água, expire forte e audível de propósito. O conteúdo do ritual importa menos do que ele ser físico, deliberado, e ter um ponto final claro. Seu corpo precisa de prova de que a coisa realmente acabou — não de mais um pensamento prometendo que acabou.",
+     "img": "https://images.unsplash.com/photo-1533228876829-65c94e7b5025?w=500&q=80&fit=crop"},
 ]
 
 
@@ -349,7 +512,7 @@ async def seed_content():
         await db.insights.update_one({"id": doc["id"]}, {"$set": doc}, upsert=True)
 
 
-LOCALIZED_FIELDS = ("title", "name", "persona", "bio", "avg_response", "excerpt", "body")
+LOCALIZED_FIELDS = ("title", "name", "persona", "bio", "avg_response", "excerpt", "body", "teaser")
 
 
 def localize_doc(doc, lang):
@@ -627,6 +790,32 @@ async def discover(lang: str = "en"):
     return {"courses": localize_list(courses, lang), "quizzes": localize_list(quizzes, lang),
             "advisors": [with_status(a) for a in localize_list(advisors_list, lang)],
             "insights": localize_list(insights, lang)}
+
+
+@api.get("/content/courses/{course_id}")
+async def course_detail(course_id: str, user=Depends(current_user)):
+    """Full detail incl. lesson content. Returns both language variants raw —
+    the nested lesson/question shape isn't worth teaching the generic
+    top-level `_pt`-suffix localizer, so the client picks per its own `lang`.
+    Requires auth (not just to view a title) because gating a locked course's
+    real content behind `user.premium` happens here, server-side — a client
+    that never got the content in the first place can't leak it via devtools."""
+    doc = await db.courses.find_one({"id": course_id}, {"_id": 0})
+    if not doc:
+        raise HTTPException(404, "Course not found")
+    if doc.get("locked") and not user.get("premium"):
+        return {k: v for k, v in doc.items() if k != "lessons_content"}
+    return doc
+
+
+@api.get("/content/quizzes/{quiz_id}")
+async def quiz_detail(quiz_id: str, user=Depends(current_user)):
+    doc = await db.quizzes.find_one({"id": quiz_id}, {"_id": 0})
+    if not doc:
+        raise HTTPException(404, "Quiz not found")
+    if doc.get("locked") and not user.get("premium"):
+        return {k: v for k, v in doc.items() if k not in ("questions", "results")}
+    return doc
 
 
 def _price_list(mapping, cur):

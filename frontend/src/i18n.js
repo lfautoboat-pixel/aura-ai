@@ -101,6 +101,7 @@ const en = {
   notifications_desc: "Get a nudge when a guide is online or has something for you.",
   notifications_test: "Send a test notification", notifications_test_sent: "Sent — check your device",
   auth_error: "Something went wrong. Check your connection and try again.",
+  mark_complete: "Mark as read", quiz_restart: "Take the quiz again",
 };
 
 const pt = {
@@ -203,6 +204,7 @@ const pt = {
   notifications_desc: "Receba um aviso quando um vidente estiver online ou tiver algo pra você.",
   notifications_test: "Enviar notificação de teste", notifications_test_sent: "Enviada — confira seu dispositivo",
   auth_error: "Algo deu errado. Verifique sua conexão e tente de novo.",
+  mark_complete: "Marcar como lido", quiz_restart: "Refazer o teste",
 };
 
 const es = {
@@ -305,6 +307,7 @@ const es = {
   notifications_desc: "Recibe un aviso cuando una guía esté en línea o tenga algo para ti.",
   notifications_test: "Enviar notificación de prueba", notifications_test_sent: "Enviada — revisa tu dispositivo",
   auth_error: "Algo salió mal. Verifica tu conexión e intenta de nuevo.",
+  mark_complete: "Marcar como leído", quiz_restart: "Repetir el test",
 };
 
 // de/fr/it/hi fall back to English via spread (structure ready for translation)

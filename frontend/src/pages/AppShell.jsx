@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageCircle, Compass, Users, BookOpen, Gift, Sparkles, Star, Coins, Crown, Download, LogOut, ChevronDown, ChevronRight, User } from "lucide-react";
+import { MessageCircle, Compass, Users, BookOpen, Gift, Sparkles, Star, Coins, Crown, Download, LogOut, ChevronDown, ChevronRight, User, Lock } from "lucide-react";
 import api from "../api";
 import { useI18n } from "../i18n";
 import { useAuth } from "../store";
@@ -63,24 +63,38 @@ function GuidesView({ advisors }) {
 
       <div className="space-y-3">
         {shown.map((a, i) => (
-          <motion.div key={a.id} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06 }}
-            className="glass rounded-2xl p-4 flex items-center gap-3" data-testid={`guide-${a.id}`}>
-            <button onClick={() => nav(`/app/advisor/${a.id}`)} className="flex items-center gap-3 flex-1 min-w-0 text-left" data-testid={`guide-profile-${a.id}`}>
-              <div className="relative shrink-0">
-                <img src={a.avatar} alt={a.name} className="w-16 h-16 rounded-2xl object-cover" />
-                <span className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-[#0b0718] ${STATUS_DOT[a.status] || STATUS_DOT.offline}`} />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="font-bold">{a.name}</div>
-                <div className="text-xs text-white/55 truncate">{a.title}</div>
-                <div className="text-xs mt-1 flex items-center gap-2 text-[#e7c46a]">
-                  ★ {a.rating} <span className="text-white/40">· {a.reviews} {t("reviews")} · {a.years} {t("years_exp")}</span>
-                  <span className={`font-semibold ${STATUS_TEXT[a.status] || STATUS_TEXT.offline}`}>· {t(a.status)}</span>
+          <motion.div key={a.id} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05, duration: 0.4 }}
+            whileTap={{ scale: 0.985 }}
+            className="relative rounded-[22px] p-[1px] overflow-hidden"
+            style={{ background: "linear-gradient(135deg, rgba(183,156,255,0.35), rgba(255,143,177,0.12) 40%, rgba(255,255,255,0.06))" }}
+            data-testid={`guide-${a.id}`}>
+            <div className="glass rounded-[21px] p-4 flex items-center gap-3">
+              <button onClick={() => nav(`/app/advisor/${a.id}`)} className="flex items-center gap-3 flex-1 min-w-0 text-left group" data-testid={`guide-profile-${a.id}`}>
+                <div className="relative shrink-0">
+                  <div className="absolute -inset-0.5 rounded-2xl bg-gradient-to-br from-[#b79cff] via-[#ff8fb1] to-[#e7c46a] opacity-70 blur-[2px]" />
+                  <img src={a.avatar} alt={a.name} className="relative w-16 h-16 rounded-2xl object-cover" />
+                  <span className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-[#0b0718] ${STATUS_DOT[a.status] || STATUS_DOT.offline}`} />
                 </div>
-              </div>
-              <ChevronRight size={16} className="text-white/25 shrink-0" />
-            </button>
-            <button onClick={() => nav(`/app/chat/${a.id}`)} className="grad-btn text-white text-xs font-bold px-3 py-2 rounded-xl whitespace-nowrap" data-testid={`chat-btn-${a.id}`}>{t("start_chat")}</button>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-1.5">
+                    <span className="font-display font-bold text-[15px] truncate">{a.name}</span>
+                  </div>
+                  <div className="text-xs text-white/55 truncate mt-0.5">{a.title}</div>
+                  <div className="text-xs mt-1.5 flex items-center gap-2 flex-wrap">
+                    <span className="text-[#e7c46a] font-semibold">★ {a.rating}</span>
+                    <span className="text-white/40">{a.reviews} {t("reviews")}</span>
+                    <span className={`font-semibold ${STATUS_TEXT[a.status] || STATUS_TEXT.offline}`}>· {t(a.status)}</span>
+                  </div>
+                  <div className="flex items-center gap-1 mt-1.5 text-[11px] text-white/50">
+                    <Coins size={11} className="text-[#e7c46a]/70" /> {a.price} {t("credits")} <span className="text-white/25">/ msg</span>
+                  </div>
+                </div>
+                <motion.span className="shrink-0 text-white/20" animate={{ x: [0, 3, 0] }} transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut", delay: i * 0.15 }}>
+                  <ChevronRight size={16} />
+                </motion.span>
+              </button>
+              <button onClick={() => nav(`/app/chat/${a.id}`)} className="grad-btn text-white text-xs font-bold px-3 py-2.5 rounded-xl whitespace-nowrap shrink-0" data-testid={`chat-btn-${a.id}`}>{t("start_chat")}</button>
+            </div>
           </motion.div>
         ))}
       </div>
@@ -147,10 +161,16 @@ function DiscoverView({ data }) {
         <h2 className="text-lg font-bold mb-3">{t("popular_courses")}</h2>
         <div className="flex gap-3 overflow-x-auto no-sb -mx-1 px-1">
           {(data?.courses || []).map((c) => (
-            <div key={c.id} className="min-w-[150px] w-[150px] glass rounded-2xl overflow-hidden" data-testid={`course-${c.id}`}>
+            <motion.button key={c.id} whileTap={{ scale: 0.96 }} onClick={() => nav(`/app/course/${c.id}`)}
+              className="min-w-[150px] w-[150px] glass rounded-2xl overflow-hidden text-left relative" data-testid={`course-${c.id}`}>
               <img src={c.img} alt={c.title} className="w-full h-24 object-cover" />
+              {c.locked && (
+                <span className="absolute top-2 right-2 w-6 h-6 rounded-full bg-black/50 backdrop-blur-sm grid place-items-center">
+                  <Lock size={11} className="text-[#e7c46a]" />
+                </span>
+              )}
               <div className="p-3"><div className="text-sm font-semibold leading-tight">{c.title}</div><div className="text-[11px] text-white/50 mt-1">{c.lessons} {t("lessons")}</div></div>
-            </div>
+            </motion.button>
           ))}
         </div>
       </div>
@@ -158,11 +178,17 @@ function DiscoverView({ data }) {
         <h2 className="text-lg font-bold mb-3">{t("quizzes_title")}</h2>
         <div className="grid grid-cols-2 gap-3">
           {(data?.quizzes || []).map((q) => (
-            <div key={q.id} className="relative rounded-2xl overflow-hidden h-28" data-testid={`quiz-${q.id}`}>
+            <motion.button key={q.id} whileTap={{ scale: 0.96 }} onClick={() => nav(`/app/quiz/${q.id}`)}
+              className="relative rounded-2xl overflow-hidden h-28 text-left" data-testid={`quiz-${q.id}`}>
               <img src={q.img} alt={q.title} className="absolute inset-0 w-full h-full object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-[#0b0718] via-[#0b0718]/30 to-transparent" />
+              {q.locked && (
+                <span className="absolute top-2 right-2 w-6 h-6 rounded-full bg-black/50 backdrop-blur-sm grid place-items-center">
+                  <Lock size={11} className="text-[#e7c46a]" />
+                </span>
+              )}
               <div className="absolute bottom-2 left-3 right-3 text-sm font-semibold">{q.title}</div>
-            </div>
+            </motion.button>
           ))}
         </div>
       </div>
@@ -174,6 +200,7 @@ function DiscoverView({ data }) {
 function ReadingsView({ data }) {
   const { t } = useI18n();
   const { user } = useAuth();
+  const nav = useNavigate();
   const sign = user?.zodiac;
   return (
     <div className="p-5 space-y-6">
@@ -191,10 +218,16 @@ function ReadingsView({ data }) {
       )}
       <div className="grid grid-cols-2 gap-3">
         {(data?.courses || []).map((c) => (
-          <div key={c.id} className="glass rounded-2xl overflow-hidden">
+          <motion.button key={c.id} whileTap={{ scale: 0.96 }} onClick={() => nav(`/app/course/${c.id}`)}
+            className="glass rounded-2xl overflow-hidden text-left relative">
             <img src={c.img} alt={c.title} className="w-full h-24 object-cover" />
+            {c.locked && (
+              <span className="absolute top-2 right-2 w-6 h-6 rounded-full bg-black/50 backdrop-blur-sm grid place-items-center">
+                <Lock size={11} className="text-[#e7c46a]" />
+              </span>
+            )}
             <div className="p-3 text-sm font-semibold leading-tight">{c.title}</div>
-          </div>
+          </motion.button>
         ))}
       </div>
     </div>
