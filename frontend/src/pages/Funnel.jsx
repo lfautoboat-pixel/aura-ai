@@ -35,6 +35,7 @@ export default function Funnel() {
   const [devCode, setDevCode] = useState("");
   const [advisors, setAdvisors] = useState([]);
   const [sending, setSending] = useState(false);
+  const [authError, setAuthError] = useState("");
 
   useEffect(() => { if (user && s === 0) nav("/app"); }, [user, s, nav]);
 
@@ -60,15 +61,21 @@ export default function Funnel() {
   const requestOtp = async () => {
     if (!email.includes("@")) return;
     setSending(true);
+    setAuthError("");
     try {
       const { data } = await api.post("/auth/request-otp", { email });
       setDevCode(data.dev_code || "");
       setS(7);
+    } catch {
+      // A failed request must never look identical to "nothing happened" —
+      // that read as a broken button in production when this had no catch.
+      setAuthError(t("auth_error"));
     } finally { setSending(false); }
   };
 
   const verify = async () => {
     setSending(true);
+    setAuthError("");
     try {
       const { data } = await api.post("/auth/verify-otp", { email, code });
       localStorage.setItem("aura_token", data.token);
@@ -78,13 +85,14 @@ export default function Funnel() {
       });
       login(data.token, data.user);
       setS(8);
-    } catch { setCode(""); } finally { setSending(false); }
+    } catch { setCode(""); setAuthError(t("auth_error")); } finally { setSending(false); }
   };
 
   const googleConfigured = !!process.env.REACT_APP_GOOGLE_CLIENT_ID;
 
   const onGoogleSuccess = async (credentialResponse) => {
     setSending(true);
+    setAuthError("");
     try {
       const { data } = await api.post("/auth/google", { credential: credentialResponse.credential });
       localStorage.setItem("aura_token", data.token);
@@ -94,6 +102,8 @@ export default function Funnel() {
       });
       login(data.token, data.user);
       nav("/app");
+    } catch {
+      setAuthError(t("auth_error"));
     } finally { setSending(false); }
   };
 
@@ -253,8 +263,9 @@ export default function Funnel() {
                 className="w-full p-4 rounded-2xl border border-[#eae4ff] bg-white text-[#2c2151]" />
               <button data-testid="email-continue" disabled={sending || !email.includes("@")} onClick={requestOtp}
                 className="w-full grad-btn text-white font-bold py-4 rounded-2xl disabled:opacity-40 flex items-center justify-center gap-2">
-                <Mail size={18} /> {t("email_btn")}
+                <Mail size={18} /> {sending ? "…" : t("email_btn")}
               </button>
+              {authError && <p data-testid="auth-error" className="text-rose-500 text-sm text-center font-semibold">{authError}</p>}
               <p className="text-[#9a90bd] text-[11px] text-center leading-relaxed">{t("consent_text")}</p>
             </motion.div>
           )}
@@ -267,7 +278,8 @@ export default function Funnel() {
               <input data-testid="otp-input" inputMode="numeric" maxLength={6} value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
                 className="w-full text-center tracking-[0.6em] font-display text-3xl p-4 rounded-2xl border border-[#eae4ff] bg-white text-[#241b45]" placeholder="••••••" />
               <button data-testid="otp-verify" disabled={sending || code.length < 6} onClick={verify}
-                className="w-full grad-btn text-white font-bold py-4 rounded-2xl disabled:opacity-40">{t("verify")}</button>
+                className="w-full grad-btn text-white font-bold py-4 rounded-2xl disabled:opacity-40">{sending ? "…" : t("verify")}</button>
+              {authError && <p data-testid="auth-error" className="text-rose-500 text-sm text-center font-semibold">{authError}</p>}
             </motion.div>
           )}
 

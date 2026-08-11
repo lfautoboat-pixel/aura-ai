@@ -1,10 +1,21 @@
 // craco.config.js
 const path = require("path");
-require("dotenv").config();
 
 // Check if we're in development/preview mode (not production build)
 // Craco sets NODE_ENV=development for start, NODE_ENV=production for build
 const isDevServer = process.env.NODE_ENV !== "production";
+
+// Only load plain .env here for the dev server (e.g. ENABLE_HEALTH_CHECK
+// below). Loading it unconditionally used to run BEFORE react-scripts' own
+// env.js applies its .env.production > .env.local > .env precedence — since
+// dotenv never overrides an already-set process.env value, .env's dev value
+// (REACT_APP_BACKEND_URL=localhost) always won, even in production builds
+// that explicitly set REACT_APP_BACKEND_URL. This shipped a production
+// build pointed at localhost on 2026-08-07 — real production outage, not
+// hypothetical.
+if (isDevServer) {
+  require("dotenv").config();
+}
 
 // Environment variable overrides
 const config = {
