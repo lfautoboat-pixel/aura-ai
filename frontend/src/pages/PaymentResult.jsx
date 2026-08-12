@@ -36,7 +36,7 @@ export function PaymentSuccess() {
       setTimeout(poll, 1800);
     };
     poll();
-  }, [sid, refresh]);
+  }, [sid, refresh, nav]);
 
   return (
     <div className="app-frame cosmic-bg min-h-screen relative grid place-items-center">
