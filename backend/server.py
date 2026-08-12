@@ -1,9 +1,9 @@
-import os, uuid, random, logging, asyncio, json
+import os, uuid, random, logging, asyncio, json, base64
 from pathlib import Path
 from datetime import datetime, timezone, timedelta
 from typing import Optional, List
 
-from fastapi import FastAPI, APIRouter, HTTPException, Depends, Request
+from fastapi import FastAPI, APIRouter, HTTPException, Depends, Request, UploadFile, File, Form
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
@@ -1152,6 +1152,174 @@ async def _daily_reengagement_push():
                          "Aura AI", "Your guides are online and ready when you are.")
         if not ok:
             await db.push_subscriptions.delete_one({"endpoint": sub["endpoint"]})
+
+
+# ----------------------- Soulmate Sketch (Nebula pre-landing funnel) -----------------------
+# Fully local/free image generation (Pillow) — no third-party API, no keys, no
+# per-request cost. Ported verbatim from the Emergent-delivered funnel prototype
+# (memory/PRD.md in that export) into this backend since both are already FastAPI.
+# Stateless by design: the selfie is never persisted, only transformed in-memory
+# and returned as base64 — matches the privacy posture already used elsewhere
+# in this file (see /auth/request-otp) of not storing more than necessary.
+class SoulmateSketch(BaseModel):
+    reading_id: str
+    status: str
+    image_base64: str
+
+
+def _pencil_sketch(contents: bytes) -> bytes:
+    """Selfie -> mystical pencil-sketch portrait: dodge-blend edges, violet
+    astral halo, graphite-to-violet duotone, vignette. See rule 2.6 of the
+    studio manual — every filter here runs once, offline per request, never
+    in a scroll/animation loop, so the Pillow cost is a one-shot, not a tax
+    paid on every frame."""
+    from PIL import Image, ImageOps, ImageFilter, ImageChops, ImageEnhance, ImageDraw
+    import io
+
+    src = Image.open(io.BytesIO(contents)).convert("RGB")
+    src = ImageOps.exif_transpose(src)
+    side = min(src.size)
+    left = (src.width - side) // 2
+    top = (src.height - side) // 2
+    src = src.crop((left, top, left + side, top + side)).resize((768, 768), Image.LANCZOS)
+
+    gray = src.convert("L")
+    inverted = ImageOps.invert(gray)
+    blurred = inverted.filter(ImageFilter.GaussianBlur(radius=18))
+
+    def _dodge(front: Image.Image, back: Image.Image) -> Image.Image:
+        return ImageChops.subtract(front, ImageChops.invert(back), scale=1.0, offset=0)
+
+    sketch = _dodge(gray, blurred)
+    sketch = ImageEnhance.Contrast(sketch).enhance(1.35)
+    sketch = ImageEnhance.Brightness(sketch).enhance(1.05)
+
+    tinted = ImageOps.colorize(sketch, black=(24, 12, 38), white=(245, 236, 255), mid=(155, 122, 216))
+
+    vignette = Image.new("L", tinted.size, 0)
+    draw = ImageDraw.Draw(vignette)
+    for radius in range(0, 220, 4):
+        alpha = int(215 * (radius / 220))
+        draw.ellipse([radius, radius, tinted.width - radius, tinted.height - radius], fill=alpha)
+    vignette = vignette.filter(ImageFilter.GaussianBlur(60))
+    tinted.putalpha(vignette)
+    canvas = Image.new("RGB", tinted.size, (11, 7, 20))
+    canvas.paste(tinted, mask=tinted.split()[-1])
+
+    glow = Image.new("RGB", canvas.size, (11, 7, 20))
+    gdraw = ImageDraw.Draw(glow)
+    gdraw.ellipse((-150, -150, 500, 500), fill=(90, 60, 165))
+    gdraw.ellipse((350, 350, 900, 900), fill=(50, 30, 100))
+    glow = glow.filter(ImageFilter.GaussianBlur(180))
+    canvas = ImageChops.screen(canvas, glow)
+
+    output = io.BytesIO()
+    canvas.save(output, format="PNG", optimize=True)
+    return output.getvalue()
+
+
+def _astral_portrait(answers: str, language: str) -> bytes:
+    """No-selfie branch: deterministic-per-answers abstract astral portrait
+    (nebula haze, silhouette moon, mandala rings, stars) so skipping the
+    selfie still returns a real, unique visual."""
+    from PIL import Image, ImageDraw, ImageFilter
+    import io
+    import random
+    import math
+
+    seed = sum(ord(c) for c in (answers or "")) + sum(ord(c) for c in (language or "en"))
+    rng = random.Random(seed or 1)
+
+    size = 768
+    canvas = Image.new("RGB", (size, size), (11, 7, 20))
+
+    haze = Image.new("RGB", (size, size), (11, 7, 20))
+    hdraw = ImageDraw.Draw(haze)
+    for _ in range(4):
+        cx = rng.randint(80, size - 80)
+        cy = rng.randint(80, size - 80)
+        r = rng.randint(180, 340)
+        tint = rng.choice([(90, 60, 165), (60, 40, 130), (120, 90, 210), (40, 30, 100)])
+        hdraw.ellipse((cx - r, cy - r, cx + r, cy + r), fill=tint)
+    haze = haze.filter(ImageFilter.GaussianBlur(150))
+    canvas = Image.blend(canvas, haze, 0.9)
+
+    draw = ImageDraw.Draw(canvas)
+    cx, cy, radius = size // 2, size // 2 - 30, 210
+    for i in range(radius, 0, -3):
+        alpha = 1 - i / radius
+        shade = int(20 + alpha * 60)
+        draw.ellipse((cx - i, cy - i, cx + i, cy + i), fill=(shade + 30, shade + 20, shade + 60))
+    draw.ellipse((cx - radius + 40, cy - radius, cx + radius + 40, cy + radius), fill=(11, 7, 20))
+
+    for ring in range(3):
+        rr = radius + 60 + ring * 42
+        for angle in range(0, 360, 6):
+            a = math.radians(angle + ring * 15)
+            x = cx + math.cos(a) * rr
+            y = cy + math.sin(a) * rr
+            draw.ellipse((x - 1.5, y - 1.5, x + 1.5, y + 1.5), fill=(200, 170, 255))
+
+    for _ in range(70):
+        sx = rng.randint(0, size)
+        sy = rng.randint(0, size)
+        sr = rng.choice([1, 1, 1, 2, 2, 3])
+        tone = rng.choice([(245, 236, 255), (200, 170, 255), (155, 122, 216)])
+        draw.ellipse((sx - sr, sy - sr, sx + sr, sy + sr), fill=tone)
+
+    vignette = Image.new("L", canvas.size, 0)
+    vdraw = ImageDraw.Draw(vignette)
+    for radius_step in range(0, 240, 6):
+        alpha = int(220 * (radius_step / 240))
+        vdraw.ellipse([radius_step, radius_step, canvas.width - radius_step, canvas.height - radius_step], fill=alpha)
+    vignette = vignette.filter(ImageFilter.GaussianBlur(70))
+    canvas.putalpha(vignette)
+    base = Image.new("RGB", canvas.size, (7, 4, 14))
+    base.paste(canvas, mask=canvas.split()[-1])
+
+    output = io.BytesIO()
+    base.save(output, format="PNG", optimize=True)
+    return output.getvalue()
+
+
+@api.post("/soulmate/sketch", response_model=SoulmateSketch)
+async def generate_soulmate_sketch(
+    selfie: UploadFile | None = File(None),
+    answers: str = Form("{}"),
+    language: str = Form("en"),
+):
+    if selfie is not None:
+        if not selfie.content_type or not selfie.content_type.startswith("image/"):
+            raise HTTPException(status_code=400, detail="Please upload an image file")
+        contents = await selfie.read()
+        if not contents or len(contents) > 10 * 1024 * 1024:
+            raise HTTPException(status_code=400, detail="Image must be between 1 byte and 10 MB")
+        try:
+            rendered = _pencil_sketch(contents)
+        except Exception:
+            logger.exception("Soulmate sketch rendering failed")
+            raise HTTPException(status_code=422, detail="Could not read this selfie, please try another photo")
+    else:
+        rendered = _astral_portrait(answers, language)
+    return SoulmateSketch(
+        reading_id=str(uuid.uuid4()),
+        status="ready",
+        image_base64=base64.b64encode(rendered).decode("ascii"),
+    )
+
+
+class SoulmateQuiz(BaseModel):
+    answers: dict = {}
+    language: str = "en"
+
+
+@api.post("/soulmate/quiz")
+async def save_soulmate_quiz(body: SoulmateQuiz, user=Depends(current_user)):
+    """Persists the Nebula funnel's own quiz answers separately from the
+    legacy /quiz payload (different question set — see QuizPayload above,
+    kept intact for the /legacy funnel route)."""
+    await db.users.update_one({"id": user["id"]}, {"$set": {"soulmate_quiz": body.answers, "soulmate_lang": body.language}})
+    return {"saved": True}
 
 
 # ----------------------- Payments -----------------------

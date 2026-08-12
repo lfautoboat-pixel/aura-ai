@@ -19,7 +19,18 @@ export function PaymentSuccess() {
       tries += 1;
       try {
         const { data } = await api.get(`/payments/status/${sid}`);
-        if (data.payment_status === "paid") { await refresh(); setStatus("paid"); return; }
+        if (data.payment_status === "paid") {
+          await refresh();
+          // Nebula funnel checkout (see CheckoutModal.jsx) stashes the reading
+          // before redirecting here — send those users back into the funnel's
+          // own Result step instead of the generic "you're all set" screen.
+          if (localStorage.getItem("nebula_pending_reading")) {
+            nav("/?revealed=1", { replace: true });
+            return;
+          }
+          setStatus("paid");
+          return;
+        }
         if (["expired", "failed"].includes(data.payment_status) || tries > 8) { setStatus("error"); return; }
       } catch { if (tries > 8) { setStatus("error"); return; } }
       setTimeout(poll, 1800);

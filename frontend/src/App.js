@@ -5,6 +5,7 @@ import { I18nProvider } from "@/i18n";
 import { AuthProvider } from "@/store";
 import { Toaster } from "sonner";
 import Funnel from "@/pages/Funnel";
+import Nebula from "@/pages/Nebula";
 import AppShell from "@/pages/AppShell";
 import Chat from "@/pages/Chat";
 import AdvisorProfile from "@/pages/AdvisorProfile";
@@ -21,7 +22,10 @@ const GOOGLE_CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID || "";
 function AppRouter() {
   return (
     <Routes>
-      <Route path="/" element={<Funnel />} />
+      <Route path="/" element={<Nebula />} />
+      {/* Previous entry funnel — preserved intact for A/B testing, per rule 2.1
+          of the studio manual (never delete a validated flow, just relocate it). */}
+      <Route path="/legacy" element={<Funnel />} />
       <Route path="/app" element={<Navigate to="/app/guides" replace />} />
       <Route path="/app/chat/:id" element={<Chat />} />
       <Route path="/app/advisor/:id" element={<AdvisorProfile />} />
