@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { ArrowRight, Download, Share2, Sparkles } from "lucide-react";
 import { useFunnel } from "@/state/FunnelContext";
 import { computeCompatibility } from "@/data/compatibility";
+import { zodiacFromISODate } from "@/data/zodiac";
 
 async function buildShareCard(imgSrc, traits, labels, signature) {
   const canvas = document.createElement("canvas");
@@ -49,6 +50,8 @@ async function buildShareCard(imgSrc, traits, labels, signature) {
 export function Result() {
   const { t, image, answers, saveReading, reset, language } = useFunnel();
   const compatibility = useMemo(() => computeCompatibility(answers), [answers]);
+  const zodiacKey = useMemo(() => zodiacFromISODate(answers.q5), [answers.q5]);
+  const zodiacName = zodiacKey && t.zodiac?.[zodiacKey];
   const [savedNote, setSavedNote] = useState(false);
   const [shareNote, setShareNote] = useState(false);
 
@@ -109,6 +112,7 @@ export function Result() {
       </div>
 
       <div className="result-meta" data-testid="result-insight">
+        {zodiacName && <span data-testid="result-zodiac">✦ {zodiacName}</span>}
         {t.result.meta.map((label) => (
           <span key={label}>✦ {label}</span>
         ))}

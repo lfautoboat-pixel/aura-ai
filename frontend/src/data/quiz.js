@@ -5,9 +5,20 @@
 export const questionIds = ["q1", "q2", "q3", "q4", "q5", "q6", "q7", "q8", "q9", "q10", "q11", "q12", "q13", "q14", "q15"];
 
 export const questionTypes = {
+  q5: "date",
   q6: "multi",
   q12: "multi",
   q13: "multi",
+  q14: "scale",
+};
+
+// Purely visual — how each question's options are rendered. Never changes
+// order, branching or scoring (data/compatibility.js), only presentation,
+// so the funnel's validated conversion skeleton stays untouched.
+export const LAYOUTS = {
+  q1: "list", q2: "list", q3: "grid-icon", q4: "grid-icon", q5: "date",
+  q6: "chips", q7: "list", q8: "list", q9: "grid-icon", q10: "grid-icon",
+  q11: "list", q12: "chips", q13: "chips", q14: "scale", q15: "list",
 };
 
 // Branching rules — if answers exclude a question, we skip it dynamically.

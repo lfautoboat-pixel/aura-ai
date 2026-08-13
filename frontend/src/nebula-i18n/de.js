@@ -19,6 +19,7 @@ const de = {
     continue: "Weiter",
     multiHint: "Wähle alle zutreffenden aus",
     singleHint: "Wähle die Antwort, die sich richtig anfühlt.",
+    dateHint: "Das hilft, deine Lesung mit deinem echten Geburtshoroskop abzugleichen.",
     category: "Über dich",
     q1: { title: "Ich bin...", options: ["Weiblich", "Männlich"] },
     q2: { title: "Welches Geschlecht hat dein idealer Partner?", options: ["Weiblich", "Männlich", "Egal"] },
@@ -27,7 +28,7 @@ const de = {
       title: "Welche ethnische Herkunft sollte dein idealer Partner haben?",
       options: ["Afroamerikanisch", "Kaukasisch", "Latino", "Asiatisch", "Egal"],
     },
-    q5: { title: "Was ist dein Geburtsdatum?", options: ["01. Jan 1990", "14. Feb 1992", "21. Jun 1995"] },
+    q5: { title: "Was ist dein Geburtsdatum?" },
     q6: {
       title: "Welche Eigenschaften suchst du bei deinem idealen Partner?",
       options: ["Freundlich", "Unterstützend", "Ehrlich", "Optimistisch", "Loyal", "Fürsorglich", "Selbstsicher", "Leidenschaftlich", "Lustig", "Beschützend"],
@@ -171,6 +172,17 @@ const de = {
     text: "Mit dem Akzeptieren erlaubst du Navigations- und Marketing-Cookies.",
     accept: "Alle akzeptieren",
     reject: "Ablehnen",
+  },
+  insights: {
+    afterPartnerGender: "Kalibriere deine Lesung auf {value}-Energie…",
+    afterBirthDate: "Du bist {value}. Das Horoskop deiner Seelenverwandten reagiert bereits auf deins.",
+    afterQualities: "„{value}“ — notiert. Verfeinere deine Übereinstimmung.",
+    afterStruggle: "{value}. Häufiger als du denkst — und es prägt schon deine heutige Lesung.",
+  },
+  zodiac: {
+    aries: "Widder", taurus: "Stier", gemini: "Zwillinge", cancer: "Krebs",
+    leo: "Löwe", virgo: "Jungfrau", libra: "Waage", scorpio: "Skorpion",
+    sagittarius: "Schütze", capricorn: "Steinbock", aquarius: "Wassermann", pisces: "Fische",
   },
   footer: "Nur zu Unterhaltungszwecken · Aura AI · Deine Auswahl bleibt privat",
 };

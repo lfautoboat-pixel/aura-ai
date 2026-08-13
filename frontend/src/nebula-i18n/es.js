@@ -19,6 +19,7 @@ const es = {
     continue: "Continuar",
     multiHint: "Selecciona todas las que apliquen",
     singleHint: "Elige la respuesta que te resuene.",
+    dateHint: "Esto ayuda a alinear tu lectura con tu carta natal real.",
     category: "Sobre ti",
     q1: { title: "Soy...", options: ["Mujer", "Hombre"] },
     q2: { title: "¿Qué género tiene tu pareja ideal?", options: ["Mujer", "Hombre", "No importa"] },
@@ -27,7 +28,7 @@ const es = {
       title: "¿Qué origen étnico debería tener tu pareja ideal?",
       options: ["Afroamericano", "Caucásico", "Latino", "Asiático", "No importa"],
     },
-    q5: { title: "¿Cuál es tu fecha de nacimiento?", options: ["01 ene 1990", "14 feb 1992", "21 jun 1995"] },
+    q5: { title: "¿Cuál es tu fecha de nacimiento?" },
     q6: {
       title: "¿Qué cualidades buscas en tu pareja ideal?",
       options: ["Amable", "Solidario", "Honesto", "Optimista", "Leal", "Cariñoso", "Seguro", "Apasionado", "Divertido", "Protector"],
@@ -171,6 +172,17 @@ const es = {
     text: "Al aceptar, permites cookies de navegación y marketing.",
     accept: "Aceptar todo",
     reject: "Rechazar",
+  },
+  insights: {
+    afterPartnerGender: "Calibrando tu lectura hacia energía {value}…",
+    afterBirthDate: "Eres {value}. La carta de tu alma gemela ya está respondiendo a la tuya.",
+    afterQualities: "“{value}” — anotado. Afinando tu compatibilidad.",
+    afterStruggle: "{value}. Más común de lo que crees — y ya está dando forma a tu lectura de esta noche.",
+  },
+  zodiac: {
+    aries: "Aries", taurus: "Tauro", gemini: "Géminis", cancer: "Cáncer",
+    leo: "Leo", virgo: "Virgo", libra: "Libra", scorpio: "Escorpio",
+    sagittarius: "Sagitario", capricorn: "Capricornio", aquarius: "Acuario", pisces: "Piscis",
   },
   footer: "Solo con fines de entretenimiento · Aura AI · Tus elecciones son privadas",
 };

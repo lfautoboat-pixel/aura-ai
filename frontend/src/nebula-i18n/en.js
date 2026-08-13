@@ -20,6 +20,7 @@ const en = {
     continue: "Continue",
     multiHint: "Please select all that apply",
     singleHint: "Choose the answer that feels right for you.",
+    dateHint: "This helps align your reading with your actual birth chart.",
     category: "About you",
     q1: { title: "I'm a...", options: ["Female", "Male"] },
     q2: { title: "What gender is your ideal partner?", options: ["Female", "Male", "Doesn't matter"] },
@@ -28,7 +29,7 @@ const en = {
       title: "What ethnic background should your ideal partner have?",
       options: ["African/African-American", "Caucasian/White", "Hispanic/Latino", "Asian", "Doesn't matter"],
     },
-    q5: { title: "What's your date of birth?", options: ["Jan 01, 1990", "Feb 14, 1992", "Jun 21, 1995"] },
+    q5: { title: "What's your date of birth?" },
     q6: {
       title: "What qualities do you look for in your ideal partner?",
       options: [
@@ -227,6 +228,17 @@ const en = {
     text: "By clicking Accept All Cookies, you agree to cookies used for navigation and marketing.",
     accept: "Accept All Cookies",
     reject: "Reject All",
+  },
+  insights: {
+    afterPartnerGender: "Calibrating your reading toward {value} energy…",
+    afterBirthDate: "You're a {value}. Your soulmate's chart is already responding to yours.",
+    afterQualities: "“{value}” — noted. Refining your match.",
+    afterStruggle: "{value}. More common than you'd think — and it's already shaping tonight's reading.",
+  },
+  zodiac: {
+    aries: "Aries", taurus: "Taurus", gemini: "Gemini", cancer: "Cancer",
+    leo: "Leo", virgo: "Virgo", libra: "Libra", scorpio: "Scorpio",
+    sagittarius: "Sagittarius", capricorn: "Capricorn", aquarius: "Aquarius", pisces: "Pisces",
   },
   footer: "For entertainment purposes only · Aura AI · Your choices remain private",
 };

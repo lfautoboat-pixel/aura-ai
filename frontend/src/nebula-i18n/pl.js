@@ -20,6 +20,7 @@ const pl = {
     continue: "Dalej",
     multiHint: "Zaznacz wszystkie, które pasują",
     singleHint: "Wybierz odpowiedź, która najbardziej Ci pasuje.",
+    dateHint: "To pomaga dopasować Twój odczyt do prawdziwej mapy urodzenia.",
     category: "O Tobie",
     q1: { title: "Jestem...", options: ["Kobietą", "Mężczyzną"] },
     q2: { title: "Jakiej płci ma być Twoja idealna osoba?", options: ["Kobietą", "Mężczyzną", "Bez znaczenia"] },
@@ -28,7 +29,7 @@ const pl = {
       title: "Jakie pochodzenie etniczne powinna mieć Twoja idealna osoba?",
       options: ["Afrykańskie", "Kaukaskie", "Latynoskie", "Azjatyckie", "Bez znaczenia"],
     },
-    q5: { title: "Kiedy się urodziłaś/eś?", options: ["01 sty 1990", "14 lut 1992", "21 cze 1995"] },
+    q5: { title: "Kiedy się urodziłaś/eś?" },
     q6: {
       title: "Jakich cech szukasz w idealnym partnerze?",
       options: [
@@ -214,6 +215,17 @@ const pl = {
     text: "Klikając Akceptuj, zgadzasz się na pliki cookie używane do nawigacji i marketingu.",
     accept: "Akceptuj wszystkie",
     reject: "Odrzuć",
+  },
+  insights: {
+    afterPartnerGender: "Kalibruję Twój odczyt w stronę energii {value}…",
+    afterBirthDate: "Jesteś {value}. Mapa Twojej bratniej duszy już reaguje na Twoją.",
+    afterQualities: "„{value}” — zanotowane. Dopracowuję Twoje dopasowanie.",
+    afterStruggle: "{value}. Częstsze, niż myślisz — i już wpływa na dzisiejszy odczyt.",
+  },
+  zodiac: {
+    aries: "Baran", taurus: "Byk", gemini: "Bliźnięta", cancer: "Rak",
+    leo: "Lew", virgo: "Dziewica", libra: "Waga", scorpio: "Skorpion",
+    sagittarius: "Strzelec", capricorn: "Koziorożec", aquarius: "Wodnik", pisces: "Ryby",
   },
   footer: "Tylko w celach rozrywkowych · Aura AI · Twoje wybory są prywatne",
 };

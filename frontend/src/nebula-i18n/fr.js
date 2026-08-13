@@ -19,6 +19,7 @@ const fr = {
     continue: "Continuer",
     multiHint: "Sélectionnez tout ce qui s'applique",
     singleHint: "Choisissez la réponse qui vous parle.",
+    dateHint: "Cela aide à aligner votre lecture avec votre thème natal réel.",
     category: "À propos de vous",
     q1: { title: "Je suis...", options: ["Une femme", "Un homme"] },
     q2: { title: "Quel est le genre de votre partenaire idéal ?", options: ["Femme", "Homme", "Peu importe"] },
@@ -27,7 +28,7 @@ const fr = {
       title: "Quelle origine ethnique devrait avoir votre partenaire idéal ?",
       options: ["Afro-américaine", "Caucasienne", "Latino", "Asiatique", "Peu importe"],
     },
-    q5: { title: "Quelle est votre date de naissance ?", options: ["01 janv 1990", "14 févr 1992", "21 juin 1995"] },
+    q5: { title: "Quelle est votre date de naissance ?" },
     q6: {
       title: "Quelles qualités recherchez-vous chez votre partenaire idéal ?",
       options: ["Gentil", "Soutenant", "Honnête", "Optimiste", "Loyal", "Attentionné", "Confiant", "Passionné", "Drôle", "Protecteur"],
@@ -171,6 +172,17 @@ const fr = {
     text: "En acceptant, vous autorisez les cookies de navigation et marketing.",
     accept: "Tout accepter",
     reject: "Refuser",
+  },
+  insights: {
+    afterPartnerGender: "Calibrage de votre lecture vers une énergie {value}…",
+    afterBirthDate: "Vous êtes {value}. Le thème de votre âme sœur répond déjà au vôtre.",
+    afterQualities: "« {value} » — noté. Affinage de votre compatibilité.",
+    afterStruggle: "{value}. Plus courant que vous ne le pensez — et cela façonne déjà votre lecture de ce soir.",
+  },
+  zodiac: {
+    aries: "Bélier", taurus: "Taureau", gemini: "Gémeaux", cancer: "Cancer",
+    leo: "Lion", virgo: "Vierge", libra: "Balance", scorpio: "Scorpion",
+    sagittarius: "Sagittaire", capricorn: "Capricorne", aquarius: "Verseau", pisces: "Poissons",
   },
   footer: "À titre de divertissement · Aura AI · Vos choix restent privés",
 };
