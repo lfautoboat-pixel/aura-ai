@@ -1,12 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, Lock, Sparkles, ImagePlus, SkipForward, LoaderCircle, Download, RotateCcw, Check } from "lucide-react";
+import { ChevronLeft, Sparkles, ImagePlus, SkipForward, LoaderCircle, Download, RotateCcw, Check } from "lucide-react";
 import api from "../api";
 import { useI18n } from "../i18n";
 import { useAuth } from "../store";
 import { Starfield, SIGN_GLYPH } from "../components/Cosmic";
-import { UnlockSheet } from "../components/Monetize";
+import { startCheckout, ExpressCheckout } from "../components/Monetize";
 import { generateSoulmateSketch } from "../services/sketchApi";
 import {
   questionIds, questionTypes, nextQuestionIndex, previousQuestionIndex,
@@ -27,16 +27,20 @@ function todayISO(yearsAgo) {
 
 export default function SoulmateReading() {
   const nav = useNavigate();
-  const { t, lang } = useI18n();
+  const { t, lang, currency, money } = useI18n();
   const nt = nebulaLocales[NEBULA_LANG[lang] || "en"];
 
   const [state, setState] = useState("loading"); // loading | locked | quiz | selfie | processing | result | error
-  const [showUnlock, setShowUnlock] = useState(false);
   const [reading, setReading] = useState(null);
   const [questionIndex, setQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState({});
   const [selfie, setSelfie] = useState(null);
   const fileRef = useRef(null);
+  // Same real catalog the Nebula funnel's own paywall shows — both plans,
+  // not just the annual one the generic UnlockSheet defaults to elsewhere.
+  const [plans, setPlans] = useState(null);
+  const [selectedPlan, setSelectedPlan] = useState("premium_annual");
+  const [busy, setBusy] = useState(false);
 
   useEffect(() => {
     api.get("/soulmate/reading").then(({ data }) => {
@@ -45,6 +49,14 @@ export default function SoulmateReading() {
       setState("quiz");
     }).catch(() => setState("locked"));
   }, []);
+
+  useEffect(() => {
+    if (state !== "locked") return;
+    api.get(`/billing/packs?currency=${currency}`).then(({ data }) => {
+      const byKey = Object.fromEntries((data.sub_plans || []).map((p) => [p.item_key, p]));
+      setPlans(byKey);
+    });
+  }, [state, currency]);
 
   useEffect(() => () => { if (selfie?.url) URL.revokeObjectURL(selfie.url); }, [selfie]);
 
@@ -129,15 +141,31 @@ export default function SoulmateReading() {
             <div className="w-full h-44 rounded-2xl grad-btn grid place-items-center"><Sparkles size={40} className="text-white/80" /></div>
             <h1 className="font-display text-2xl mt-5">{t("soulmate_title")}</h1>
             <p className="text-white/60 text-sm mt-2 leading-relaxed">{t("soulmate_teaser")}</p>
-            <button onClick={() => setShowUnlock(true)} data-testid="soulmate-unlock"
-              className="mt-8 glass rounded-2xl p-6 flex flex-col items-center text-center gap-3 border border-white/10">
-              <div className="w-14 h-14 rounded-full grad-btn grid place-items-center"><Lock size={22} className="text-white" /></div>
-              <div>
-                <div className="font-bold">{t("unlock_title")}</div>
-                <div className="text-white/50 text-xs mt-1">{t("unlock_sub")}</div>
-              </div>
-              <span className="grad-btn text-white text-sm font-bold px-5 py-2.5 rounded-xl mt-1">{t("unlock_cta")}</span>
+
+            <div className="mt-6 space-y-3">
+              {["premium_weekly", "premium_annual"].map((planId) => {
+                const plan = plans?.[planId];
+                const active = selectedPlan === planId;
+                return (
+                  <button key={planId} onClick={() => setSelectedPlan(planId)} disabled={!plan} data-testid={`soulmate-plan-${planId}`}
+                    className={`w-full rounded-2xl p-4 flex items-center justify-between text-left border transition-colors ${active ? "grad-btn text-white border-transparent" : "glass border-white/10"}`}>
+                    <div>
+                      <div className="font-bold text-sm">{planId === "premium_annual" ? t("best_value") : (plan?.trial ? nt.paywall.trialBadge : "")}</div>
+                      <div className={`text-xs mt-0.5 ${active ? "text-white/85" : "text-white/50"}`}>{planId === "premium_annual" ? "/yr" : "/wk"}</div>
+                    </div>
+                    <div className="font-display text-lg">{plan ? money(plan.amount, currency) : "…"}</div>
+                  </button>
+                );
+              })}
+            </div>
+
+            <ExpressCheckout itemKey={selectedPlan} currency={currency} amount={plans?.[selectedPlan]?.amount} />
+
+            <button onClick={() => startCheckout(selectedPlan, currency, setBusy)} disabled={busy || !plans} data-testid="soulmate-unlock"
+              className="grad-btn text-white font-bold py-3.5 rounded-2xl mt-2 disabled:opacity-50">
+              {t("unlock_cta")}
             </button>
+            <p className="text-white/40 text-[11px] text-center mt-3">{t("wallets_note")}</p>
           </div>
         )}
 
@@ -252,7 +280,6 @@ export default function SoulmateReading() {
           </motion.div>
         )}
       </div>
-      <UnlockSheet open={showUnlock} onClose={() => setShowUnlock(false)} />
     </div>
   );
 }
