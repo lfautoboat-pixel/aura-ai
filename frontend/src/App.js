@@ -19,13 +19,30 @@ import { PaymentSuccess, PaymentCancel } from "@/pages/PaymentResult";
 // Empty until GOOGLE_CLIENT_ID is set — GoogleLogin renders nothing/disabled without it (see Funnel.jsx).
 const GOOGLE_CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID || "";
 
+// Same codebase, same backend, deployed as two separate Netlify sites that
+// only differ by which funnel greets a first-time visitor at "/" — one site
+// is the official bio link (legacy quiz->advisor funnel), the other is the
+// ads-only entry (Nebula soulmate-sketch funnel). Both funnels stay reachable
+// on every deploy either way, just at different paths, so nothing is ever
+// truly "only" on one site.
+const ENTRY_FUNNEL = process.env.REACT_APP_ENTRY_FUNNEL || "nebula";
+
 function AppRouter() {
   return (
     <Routes>
-      <Route path="/" element={<Nebula />} />
-      {/* Previous entry funnel — preserved intact for A/B testing, per rule 2.1
-          of the studio manual (never delete a validated flow, just relocate it). */}
-      <Route path="/legacy" element={<Funnel />} />
+      {ENTRY_FUNNEL === "legacy" ? (
+        <>
+          <Route path="/" element={<Funnel />} />
+          <Route path="/soulmate" element={<Nebula />} />
+        </>
+      ) : (
+        <>
+          <Route path="/" element={<Nebula />} />
+          {/* Previous entry funnel — preserved intact for A/B testing, per rule 2.1
+              of the studio manual (never delete a validated flow, just relocate it). */}
+          <Route path="/legacy" element={<Funnel />} />
+        </>
+      )}
       <Route path="/app" element={<Navigate to="/app/guides" replace />} />
       <Route path="/app/chat/:id" element={<Chat />} />
       <Route path="/app/advisor/:id" element={<AdvisorProfile />} />

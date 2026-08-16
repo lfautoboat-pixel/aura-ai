@@ -5,6 +5,11 @@ import api from "../api";
 import { useAuth } from "../store";
 import { Starfield } from "../components/Cosmic";
 
+// Matches the routing choice in App.js: on the "legacy" entry deploy, Nebula
+// lives at /soulmate instead of /, so the post-payment redirect back into it
+// has to agree with wherever this deploy actually mounted it.
+const NEBULA_PATH = (process.env.REACT_APP_ENTRY_FUNNEL || "nebula") === "legacy" ? "/soulmate" : "/";
+
 export function PaymentSuccess() {
   const [params] = useSearchParams();
   const nav = useNavigate();
@@ -25,7 +30,7 @@ export function PaymentSuccess() {
           // before redirecting here — send those users back into the funnel's
           // own Result step instead of the generic "you're all set" screen.
           if (localStorage.getItem("nebula_pending_reading")) {
-            nav("/?revealed=1", { replace: true });
+            nav(`${NEBULA_PATH}?revealed=1`, { replace: true });
             return;
           }
           setStatus("paid");
