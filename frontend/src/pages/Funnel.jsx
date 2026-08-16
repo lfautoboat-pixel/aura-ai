@@ -26,7 +26,7 @@ export default function Funnel() {
   const nav = useNavigate();
   const { t, lang } = useI18n();
   const dmy = dateOrder(lang) === "dmy";
-  const { user, login } = useAuth();
+  const { user, loading, login } = useAuth();
   const [s, setS] = useState(0);
   const [ans, setAns] = useState({});
   const [progress, setProgress] = useState(0);
@@ -110,6 +110,14 @@ export default function Funnel() {
   const months = ["01","02","03","04","05","06","07","08","09","10","11","12"];
   const years = Array.from({ length: 70 }, (_, i) => 2010 - i);
   const showBack = s > 0 && s !== 4 && s < 8;
+
+  // Returning customer check is async (/api/auth/me) — without this guard,
+  // a logged-in visitor would see the quiz intro flash for a frame or two
+  // before the redirect above fires. Same background, zero content, until
+  // we actually know whether to show the funnel or bounce to /app.
+  if (s === 0 && (loading || user)) {
+    return <div className="app-frame funnel-bg min-h-screen" />;
+  }
 
   return (
     <div className="app-frame funnel-bg min-h-screen flex flex-col">
