@@ -102,6 +102,13 @@ const en = {
   notifications_test: "Send a test notification", notifications_test_sent: "Sent — check your device",
   auth_error: "Something went wrong. Check your connection and try again.",
   mark_complete: "Mark as read", quiz_restart: "Take the quiz again",
+  soulmate_title: "Soulmate Sketch",
+  soulmate_teaser: "A mystical AI-drawn portrait of your ideal partner, plus your compatibility signature — yours to keep as a Premium member.",
+  soulmate_cta: "Reveal my soulmate sketch",
+  soulmate_your_reading: "Your soulmate reading",
+  soulmate_again: "Create a new reading",
+  soulmate_compat_title: "Compatibility signature",
+  download: "Download",
 };
 
 const pt = {
@@ -205,6 +212,12 @@ const pt = {
   notifications_test: "Enviar notificação de teste", notifications_test_sent: "Enviada — confira seu dispositivo",
   auth_error: "Algo deu errado. Verifique sua conexão e tente de novo.",
   mark_complete: "Marcar como lido", quiz_restart: "Refazer o teste",
+  soulmate_title: "Retrato da Alma Gêmea",
+  soulmate_teaser: "Um retrato místico da sua alma gêmea, gerado por IA, além da sua assinatura de compatibilidade — seu, como membro Premium.",
+  soulmate_cta: "Revelar meu retrato da alma gêmea",
+  soulmate_your_reading: "Sua leitura da alma gêmea",
+  soulmate_again: "Criar nova leitura",
+  soulmate_compat_title: "Assinatura de compatibilidade",
 };
 
 const es = {
@@ -308,6 +321,12 @@ const es = {
   notifications_test: "Enviar notificación de prueba", notifications_test_sent: "Enviada — revisa tu dispositivo",
   auth_error: "Algo salió mal. Verifica tu conexión e intenta de nuevo.",
   mark_complete: "Marcar como leído", quiz_restart: "Repetir el test",
+  soulmate_title: "Boceto del Alma Gemela",
+  soulmate_teaser: "Un retrato místico de tu alma gemela, generado por IA, además de tu firma de compatibilidad — tuyo como miembro Premium.",
+  soulmate_cta: "Revelar mi boceto del alma gemela",
+  soulmate_your_reading: "Tu lectura del alma gemela",
+  soulmate_again: "Crear una nueva lectura",
+  soulmate_compat_title: "Firma de compatibilidad",
 };
 
 // de/fr/it/hi fall back to English via spread (structure ready for translation)

@@ -1322,6 +1322,57 @@ async def save_soulmate_quiz(body: SoulmateQuiz, user=Depends(current_user)):
     return {"saved": True}
 
 
+# ----------------------- Soulmate Sketch as an in-app feature -----------------------
+# Whoever converts through the Nebula funnel and pays already has `premium`
+# set the same way any other subscription does (shared catalog, see
+# /payments/checkout). This makes the reading itself a persistent, premium-gated
+# feature inside the app — same locked/unlocked contract as
+# /content/courses/{id} and /content/quizzes/{id} above, not a new pattern.
+class SoulmateReadingSave(BaseModel):
+    answers: dict = {}
+    compatibility: dict = {}
+    image_base64: str
+    language: str = "en"
+
+
+def _zodiac_from_answers(answers: dict):
+    dob = answers.get("q5")  # ISO date string "YYYY-MM-DD", set by the date-of-birth question
+    if not dob or not isinstance(dob, str):
+        return None
+    try:
+        _, month, day = dob.split("-")
+        return get_zodiac(int(month), int(day))
+    except (ValueError, TypeError):
+        return None
+
+
+@api.get("/soulmate/reading")
+async def get_soulmate_reading(user=Depends(current_user)):
+    if not user.get("premium"):
+        return {"locked": True}
+    reading = await db.soulmate_readings.find_one({"user_id": user["id"]}, {"_id": 0}, sort=[("created_at", -1)])
+    return {"locked": False, "reading": reading}
+
+
+@api.post("/soulmate/reading")
+async def save_soulmate_reading(body: SoulmateReadingSave, user=Depends(current_user)):
+    if not user.get("premium"):
+        raise HTTPException(402, "Premium required to save a soulmate reading")
+    record = {
+        "id": str(uuid.uuid4()),
+        "user_id": user["id"],
+        "answers": body.answers,
+        "compatibility": body.compatibility,
+        "zodiac": _zodiac_from_answers(body.answers),
+        "image_base64": body.image_base64,
+        "language": body.language,
+        "created_at": now_iso(),
+    }
+    await db.soulmate_readings.insert_one(dict(record))
+    record.pop("_id", None)
+    return record
+
+
 # ----------------------- Payments -----------------------
 @api.post("/payments/checkout")
 async def checkout(body: CheckoutRequest, user=Depends(current_user)):

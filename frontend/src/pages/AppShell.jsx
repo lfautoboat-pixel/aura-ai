@@ -205,6 +205,22 @@ function ReadingsView({ data }) {
   return (
     <div className="p-5 space-y-6">
       <h1 className="font-display text-3xl">{t("nav_readings")}</h1>
+      <motion.button whileTap={{ scale: 0.98 }} onClick={() => nav("/app/soulmate")} data-testid="soulmate-card"
+        className="w-full rounded-2xl p-5 flex items-center gap-4 text-left relative overflow-hidden"
+        style={{ background: "linear-gradient(120deg, rgba(183,156,255,.22), rgba(255,143,177,.14))" }}>
+        <div className="w-14 h-14 rounded-2xl grad-btn grid place-items-center shrink-0">
+          <Sparkles className="text-white" size={22} />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="font-bold">{t("soulmate_title")}</div>
+          <div className="text-white/60 text-xs mt-1 line-clamp-2">{t("soulmate_teaser")}</div>
+        </div>
+        {!user?.premium && (
+          <span className="absolute top-3 right-3 w-6 h-6 rounded-full bg-black/50 backdrop-blur-sm grid place-items-center">
+            <Lock size={11} className="text-[#e7c46a]" />
+          </span>
+        )}
+      </motion.button>
       {sign && (
         <div className="glass rounded-2xl p-6 text-center relative overflow-hidden" data-testid="horoscope-card">
           <Starfield count={30} />

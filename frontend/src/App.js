@@ -11,6 +11,7 @@ import Chat from "@/pages/Chat";
 import AdvisorProfile from "@/pages/AdvisorProfile";
 import CourseReader from "@/pages/CourseReader";
 import QuizPlay from "@/pages/QuizPlay";
+import SoulmateReading from "@/pages/SoulmateReading";
 import Paywall from "@/pages/Paywall";
 import Profile from "@/pages/Profile";
 import Privacy from "@/pages/Privacy";
@@ -48,6 +49,7 @@ function AppRouter() {
       <Route path="/app/advisor/:id" element={<AdvisorProfile />} />
       <Route path="/app/course/:id" element={<CourseReader />} />
       <Route path="/app/quiz/:id" element={<QuizPlay />} />
+      <Route path="/app/soulmate" element={<SoulmateReading />} />
       <Route path="/app/:tab" element={<AppShell />} />
       <Route path="/app/recharge" element={<Paywall />} />
       <Route path="/app/profile" element={<Profile />} />
