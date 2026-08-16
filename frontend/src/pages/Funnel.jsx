@@ -6,6 +6,7 @@ import { GoogleLogin } from "@react-oauth/google";
 import api from "../api";
 import { useI18n, dateOrder } from "../i18n";
 import { useAuth } from "../store";
+import { getReferral } from "../referral";
 import { Logo, Starfield, SIGN_GLYPH } from "../components/Cosmic";
 
 const step = { initial: { opacity: 0, x: 40 }, animate: { opacity: 1, x: 0 }, exit: { opacity: 0, x: -40 } };
@@ -77,7 +78,7 @@ export default function Funnel() {
     setSending(true);
     setAuthError("");
     try {
-      const { data } = await api.post("/auth/verify-otp", { email, code });
+      const { data } = await api.post("/auth/verify-otp", { email, code, ref: getReferral() });
       localStorage.setItem("aura_token", data.token);
       await api.post("/quiz", {
         gender: ans.gender, topic: ans.topic, reading_type: ans.reading,
@@ -94,7 +95,7 @@ export default function Funnel() {
     setSending(true);
     setAuthError("");
     try {
-      const { data } = await api.post("/auth/google", { credential: credentialResponse.credential });
+      const { data } = await api.post("/auth/google", { credential: credentialResponse.credential, ref: getReferral() });
       localStorage.setItem("aura_token", data.token);
       await api.post("/quiz", {
         gender: ans.gender, topic: ans.topic, reading_type: ans.reading,

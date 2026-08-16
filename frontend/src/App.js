@@ -4,6 +4,13 @@ import { GoogleOAuthProvider } from "@react-oauth/google";
 import { I18nProvider } from "@/i18n";
 import { AuthProvider } from "@/store";
 import { Toaster } from "sonner";
+import { captureReferral } from "@/referral";
+import PartnerDashboard from "@/pages/PartnerDashboard";
+import PartnerAdmin from "@/pages/PartnerAdmin";
+
+// Runs once per page load, before anything else — a partner's link must be
+// attributed even if the visitor bounces on the very first screen.
+captureReferral();
 import Funnel from "@/pages/Funnel";
 import Nebula from "@/pages/Nebula";
 import AppShell from "@/pages/AppShell";
@@ -50,12 +57,17 @@ function AppRouter() {
       <Route path="/app/course/:id" element={<CourseReader />} />
       <Route path="/app/quiz/:id" element={<QuizPlay />} />
       <Route path="/app/soulmate" element={<SoulmateReading />} />
+      <Route path="/app/admin/partners" element={<PartnerAdmin />} />
       <Route path="/app/:tab" element={<AppShell />} />
       <Route path="/app/recharge" element={<Paywall />} />
       <Route path="/app/profile" element={<Profile />} />
       <Route path="/privacy" element={<Privacy />} />
       <Route path="/payment/success" element={<PaymentSuccess />} />
       <Route path="/payment/cancel" element={<PaymentCancel />} />
+      {/* No login required by design — the dashboard_token in the URL IS the
+          credential, exactly like the betting-affiliate panel the partner
+          program was modeled on (see studio memory). */}
+      <Route path="/partner/:token" element={<PartnerDashboard />} />
     </Routes>
   );
 }

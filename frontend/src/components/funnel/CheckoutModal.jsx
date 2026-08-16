@@ -5,6 +5,7 @@ import { GoogleLogin } from "@react-oauth/google";
 import { useFunnel, STEPS } from "@/state/FunnelContext";
 import { useAuth } from "@/store";
 import { useI18n } from "@/i18n";
+import { getReferral } from "@/referral";
 import { startCheckout, ExpressCheckout } from "@/components/Monetize";
 import api from "@/api";
 
@@ -65,7 +66,7 @@ export function CheckoutModal() {
     setBusy(true);
     setErrorMsg("");
     try {
-      const { data } = await api.post("/auth/verify-otp", { email, code });
+      const { data } = await api.post("/auth/verify-otp", { email, code, ref: getReferral() });
       login(data.token, data.user);
     } catch {
       setCode("");
@@ -79,7 +80,7 @@ export function CheckoutModal() {
     setBusy(true);
     setErrorMsg("");
     try {
-      const { data } = await api.post("/auth/google", { credential: credentialResponse.credential });
+      const { data } = await api.post("/auth/google", { credential: credentialResponse.credential, ref: getReferral() });
       login(data.token, data.user);
     } catch {
       setErrorMsg(t.checkout.authError);

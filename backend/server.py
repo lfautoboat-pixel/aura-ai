@@ -1,4 +1,4 @@
-import os, uuid, random, logging, asyncio, json, base64
+import os, uuid, random, logging, asyncio, json, base64, re, secrets
 from pathlib import Path
 from datetime import datetime, timezone, timedelta
 from typing import Optional, List
@@ -29,6 +29,10 @@ db = client[os.environ['DB_NAME']]
 
 JWT_SECRET = os.environ.get('JWT_SECRET', 'dev_secret')
 DEV_MODE = os.environ.get('DEV_MODE', 'false').lower() == 'true'
+# Partner-program admin access piggybacks on the same login every other admin
+# task uses here — no separate password to create or lose. Comma-separated;
+# case-insensitive so a stray capital letter never silently locks you out.
+ADMIN_EMAILS = {e.strip().lower() for e in os.environ.get('ADMIN_EMAILS', 'solutionslfdigital@gmail.com').split(',') if e.strip()}
 
 # --- AI chat: your own key(s), direct to Google Gemini (no third-party proxy,
 # no paid tier). Free-tier quota is scoped per Google Cloud PROJECT+model
@@ -606,10 +610,12 @@ class OTPRequest(BaseModel):
 class OTPVerify(BaseModel):
     email: EmailStr
     code: str
+    ref: Optional[str] = None  # partner referral code, see Partners section below
 
 
 class GoogleAuthBody(BaseModel):
     credential: str  # Google ID token (JWT) issued client-side by Google Identity Services
+    ref: Optional[str] = None
 
 
 class QuizPayload(BaseModel):
@@ -658,18 +664,35 @@ async def current_user(creds: Optional[HTTPAuthorizationCredentials] = Depends(s
     return user
 
 
-async def get_or_create_user(email: str, name: Optional[str] = None, picture: Optional[str] = None):
+async def require_admin(user=Depends(current_user)):
+    if (user.get("email") or "").lower() not in ADMIN_EMAILS:
+        raise HTTPException(403, "Admin access required")
+    return user
+
+
+async def get_or_create_user(email: str, name: Optional[str] = None, picture: Optional[str] = None, ref: Optional[str] = None):
     user = await db.users.find_one({"email": email}, {"_id": 0})
     if user:
         if picture and not user.get("picture"):
             await db.users.update_one({"id": user["id"]}, {"$set": {"picture": picture}})
         return user
+    # First-touch attribution only: a brand-new account may carry a partner's
+    # referral code, but only if that partner actually exists and is active —
+    # never trust the client's claim blindly, this decides real money later.
+    referred_by = None
+    if ref:
+        partner = await db.partners.find_one({"code": ref, "status": "active"}, {"_id": 0})
+        if partner:
+            referred_by = partner["code"]
     user = {
         "id": str(uuid.uuid4()), "email": email, "name": name or email.split("@")[0].title(),
         "picture": picture, "credits": 0, "free_messages": 3, "premium": False, "quiz": {},
-        "zodiac": None, "created_at": now_iso(),
+        "zodiac": None, "created_at": now_iso(), "referred_by": referred_by,
+        "stripe_customer_id": None, "stripe_subscription_id": None,
     }
     await db.users.insert_one(dict(user))
+    if referred_by:
+        await db.partners.update_one({"code": referred_by}, {"$inc": {"signups": 1}})
     return user
 
 
@@ -735,7 +758,7 @@ async def verify_otp(body: OTPVerify):
     if not rec or rec["code"] != body.code:
         raise HTTPException(400, "Invalid code")
     await db.otps.delete_one({"email": body.email})
-    user = await get_or_create_user(body.email)
+    user = await get_or_create_user(body.email, ref=body.ref)
     return {"token": make_token(user["id"]), "user": _pub(user)}
 
 
@@ -748,7 +771,7 @@ async def google_auth(body: GoogleAuthBody):
             body.credential, google_requests.Request(), GOOGLE_CLIENT_ID)
     except Exception:
         raise HTTPException(401, "Invalid Google credential")
-    user = await get_or_create_user(idinfo["email"], idinfo.get("name"), idinfo.get("picture"))
+    user = await get_or_create_user(idinfo["email"], idinfo.get("name"), idinfo.get("picture"), ref=body.ref)
     return {"token": make_token(user["id"]), "user": _pub(user)}
 
 
@@ -1154,6 +1177,174 @@ async def _daily_reengagement_push():
             await db.push_subscriptions.delete_one({"endpoint": sub["endpoint"]})
 
 
+# ----------------------- Partner / affiliate program -----------------------
+# One collection of truth (db.partners) + an append-only ledger (db.partner_earnings)
+# rather than mutating a single running total anywhere — every commission a
+# partner is ever owed can always be reconstructed and audited from the
+# ledger alone, which is the whole point when real people's money is on the
+# line. earnings_owed/earnings_total on the partner doc are a cache for fast
+# dashboard reads, kept in sync by $inc at the moment each ledger row is
+# written (see _credit_partner_commission) and by mark-paid (below).
+
+class PartnerCreate(BaseModel):
+    name: str
+    commission_rate: float = 0.30  # 0.30 == 30% of every charge, initial + each renewal — the studio's standard offer
+    contact: Optional[str] = None  # how to reach them — TikTok handle, email, whatever
+    payout_note: Optional[str] = None  # Wise email / Pix key / etc — free text, paid manually
+
+
+class PartnerUpdate(BaseModel):
+    name: Optional[str] = None
+    commission_rate: Optional[float] = None
+    contact: Optional[str] = None
+    payout_note: Optional[str] = None
+    status: Optional[str] = None  # active | paused
+
+
+class PayoutRequestCreate(BaseModel):
+    currency: str
+    amount: Optional[int] = None  # minor units; omit to request the full owed balance
+    note: Optional[str] = None
+
+
+def _slugify(name: str) -> str:
+    s = re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-")
+    return s or "partner"
+
+
+async def _unique_partner_code(name: str) -> str:
+    base = _slugify(name)
+    code = base
+    i = 1
+    while await db.partners.find_one({"code": code}):
+        i += 1
+        code = f"{base}-{i}"
+    return code
+
+
+def _partner_public(p: dict, site_url: str = None) -> dict:
+    """Never leak the dashboard_token in any admin-listing response body by
+    accident — it's a bearer secret, it goes out exactly once, at creation."""
+    out = {k: v for k, v in p.items() if k not in ("_id", "dashboard_token")}
+    if site_url:
+        out["referral_url"] = f"{site_url}/?ref={p['code']}"
+    return out
+
+
+@api.post("/admin/partners")
+async def create_partner(body: PartnerCreate, admin=Depends(require_admin)):
+    if not (0 < body.commission_rate < 1):
+        raise HTTPException(400, "commission_rate must be a fraction between 0 and 1, e.g. 0.25 for 25%")
+    code = await _unique_partner_code(body.name)
+    partner = {
+        "id": str(uuid.uuid4()), "code": code, "name": body.name,
+        "commission_rate": body.commission_rate, "contact": body.contact, "payout_note": body.payout_note,
+        "status": "active", "dashboard_token": secrets.token_urlsafe(24),
+        "clicks": 0, "signups": 0, "earnings_owed": {}, "earnings_total": {},
+        "created_at": now_iso(),
+    }
+    await db.partners.insert_one(dict(partner))
+    return partner  # only place the raw dashboard_token is ever returned
+
+
+@api.get("/admin/partners")
+async def list_partners(admin=Depends(require_admin)):
+    partners = await db.partners.find({}, {"_id": 0}).sort("created_at", -1).to_list(500)
+    return [_partner_public(p) for p in partners]
+
+
+@api.patch("/admin/partners/{partner_id}")
+async def update_partner(partner_id: str, body: PartnerUpdate, admin=Depends(require_admin)):
+    updates = {k: v for k, v in body.model_dump().items() if v is not None}
+    if "commission_rate" in updates and not (0 < updates["commission_rate"] < 1):
+        raise HTTPException(400, "commission_rate must be a fraction between 0 and 1")
+    if updates:
+        await db.partners.update_one({"id": partner_id}, {"$set": updates})
+    p = await db.partners.find_one({"id": partner_id}, {"_id": 0})
+    if not p:
+        raise HTTPException(404, "Partner not found")
+    return _partner_public(p)
+
+
+@api.post("/admin/partners/{partner_id}/regenerate-link")
+async def regenerate_partner_link(partner_id: str, admin=Depends(require_admin)):
+    """Safety net for a solo non-technical operator: the dashboard_token is
+    only ever shown once, at creation. If it's lost before being copied and
+    sent to the partner, this is the only way to recover access — issuing a
+    fresh token immediately invalidates whatever the partner may have already
+    bookmarked, so this should only be used when the original was never sent."""
+    new_token = secrets.token_urlsafe(24)
+    result = await db.partners.update_one({"id": partner_id}, {"$set": {"dashboard_token": new_token}})
+    if result.matched_count == 0:
+        raise HTTPException(404, "Partner not found")
+    return {"dashboard_token": new_token}
+
+
+@api.get("/admin/partners/{partner_id}/earnings")
+async def partner_earnings_ledger(partner_id: str, admin=Depends(require_admin)):
+    rows = await db.partner_earnings.find({"partner_id": partner_id}, {"_id": 0}).sort("created_at", -1).to_list(500)
+    return rows
+
+
+@api.get("/admin/payouts")
+async def list_payouts(admin=Depends(require_admin)):
+    rows = await db.payout_requests.find({}, {"_id": 0}).sort("created_at", -1).to_list(500)
+    return rows
+
+
+@api.post("/admin/payouts/{payout_id}/mark-paid")
+async def mark_payout_paid(payout_id: str, admin=Depends(require_admin)):
+    payout = await db.payout_requests.find_one({"id": payout_id}, {"_id": 0})
+    if not payout:
+        raise HTTPException(404, "Payout request not found")
+    if payout["status"] == "paid":
+        return payout
+    await db.payout_requests.update_one({"id": payout_id}, {"$set": {"status": "paid", "paid_at": now_iso()}})
+    await db.partners.update_one(
+        {"id": payout["partner_id"]},
+        {"$inc": {f"earnings_owed.{payout['currency']}": -payout["amount"]}},
+    )
+    payout["status"] = "paid"
+    return payout
+
+
+@api.post("/partners/track")
+async def track_partner_click(body: dict):
+    code = (body or {}).get("code")
+    if not code:
+        return {"tracked": False}
+    result = await db.partners.update_one({"code": code, "status": "active"}, {"$inc": {"clicks": 1}})
+    return {"tracked": result.matched_count > 0}
+
+
+@api.get("/partner/{token}")
+async def partner_dashboard(token: str):
+    partner = await db.partners.find_one({"dashboard_token": token}, {"_id": 0})
+    if not partner:
+        raise HTTPException(404, "Not found")
+    recent = await db.partner_earnings.find({"partner_id": partner["id"]}, {"_id": 0}).sort("created_at", -1).to_list(50)
+    payouts = await db.payout_requests.find({"partner_id": partner["id"]}, {"_id": 0}).sort("created_at", -1).to_list(50)
+    return {**_partner_public(partner), "recent_earnings": recent, "payout_requests": payouts}
+
+
+@api.post("/partner/{token}/payout-request")
+async def request_payout(token: str, body: PayoutRequestCreate):
+    partner = await db.partners.find_one({"dashboard_token": token}, {"_id": 0})
+    if not partner:
+        raise HTTPException(404, "Not found")
+    owed = partner.get("earnings_owed", {}).get(body.currency, 0)
+    amount = body.amount if body.amount is not None else owed
+    if amount <= 0 or amount > owed:
+        raise HTTPException(400, "Requested amount exceeds the current owed balance")
+    request_doc = {
+        "id": str(uuid.uuid4()), "partner_id": partner["id"], "partner_code": partner["code"],
+        "amount": amount, "currency": body.currency, "note": body.note,
+        "status": "pending", "created_at": now_iso(),
+    }
+    await db.payout_requests.insert_one(dict(request_doc))
+    return request_doc
+
+
 # ----------------------- Soulmate Sketch (Nebula pre-landing funnel) -----------------------
 # Fully local/free image generation (Pillow) — no third-party API, no keys, no
 # per-request cost. Ported verbatim from the Emergent-delivered funnel prototype
@@ -1451,6 +1642,30 @@ def _tx_label(item_key):
     return f"Aura Premium ({it.get('interval', '')})"
 
 
+async def _credit_partner_commission(user: dict, amount: int, currency: str, source: str, stripe_invoice_id: str = None):
+    """Recurring commission only works if this fires on every real charge —
+    initial AND renewal (see the invoice.paid handler below). A partner's
+    code is trusted here because it was already validated once, against a
+    real active partner, at signup time (see get_or_create_user)."""
+    code = user.get("referred_by") if user else None
+    if not code or not amount:
+        return
+    partner = await db.partners.find_one({"code": code, "status": "active"}, {"_id": 0})
+    if not partner:
+        return
+    commission = round(amount * partner["commission_rate"])
+    await db.partner_earnings.insert_one({
+        "id": str(uuid.uuid4()), "partner_id": partner["id"], "partner_code": code,
+        "user_id": user["id"], "user_email": user.get("email"), "source": source,
+        "amount": amount, "currency": currency, "commission_amount": commission,
+        "stripe_invoice_id": stripe_invoice_id, "created_at": now_iso(),
+    })
+    await db.partners.update_one(
+        {"id": partner["id"]},
+        {"$inc": {f"earnings_owed.{currency}": commission, f"earnings_total.{currency}": commission}},
+    )
+
+
 async def _fulfill(record):
     if not record or record.get("fulfilled"):
         return
@@ -1462,6 +1677,8 @@ async def _fulfill(record):
     else:
         await db.users.update_one({"id": record["user_id"]}, {"$set": {"premium": True}})
     await db.payment_transactions.update_one({"session_id": record["session_id"]}, {"$set": {"fulfilled": True}})
+    user = await db.users.find_one({"id": record["user_id"]}, {"_id": 0})
+    await _credit_partner_commission(user, record.get("amount", 0), record.get("currency", "usd"), "initial")
 
 
 @api.get("/payments/status/{session_id}")
@@ -1511,12 +1728,44 @@ async def stripe_webhook(request: Request):
     except Exception:
         raise HTTPException(400, "Invalid signature")
     obj, t = event["data"]["object"], event["type"]
+
     if t in ("checkout.session.completed", "payment_intent.succeeded"):
         await db.payment_transactions.update_one(
             {"session_id": obj["id"], "payment_status": {"$ne": "paid"}},
             {"$set": {"status": "completed", "payment_status": "paid", "updated_at": now_iso()}})
         rec = await db.payment_transactions.find_one({"session_id": obj["id"]})
+        # Subscription mode Sessions carry the Stripe customer/subscription
+        # ids the moment checkout completes — capture them now, it's the
+        # only reliable hook we get before the *next* billing cycle fires
+        # its own separate event (invoice.paid, below) with no link back to
+        # our session_id at all, only to the customer id.
+        if rec and t == "checkout.session.completed" and obj.get("mode") == "subscription":
+            await db.users.update_one(
+                {"id": rec["user_id"]},
+                {"$set": {"stripe_customer_id": obj.get("customer"), "stripe_subscription_id": obj.get("subscription")}},
+            )
         await _fulfill(rec)
+
+    elif t == "invoice.paid" and obj.get("billing_reason") == "subscription_cycle":
+        # A renewal — the customer's card was charged again automatically by
+        # Stripe, with no checkout.session in the loop at all. This is the
+        # ONLY signal that a recurring partner commission is owed again.
+        # Guard against Stripe's at-least-once delivery (retries on any
+        # non-2xx, occasional genuine duplicates) crediting the same
+        # invoice twice — check before inserting, not after.
+        already = await db.partner_earnings.find_one({"stripe_invoice_id": obj["id"]})
+        if not already:
+            user = await db.users.find_one({"stripe_customer_id": obj.get("customer")}, {"_id": 0})
+            if user:
+                await _credit_partner_commission(user, obj.get("amount_paid", 0), obj.get("currency", "usd"), "renewal", stripe_invoice_id=obj["id"])
+
+    elif t in ("customer.subscription.deleted",):
+        # Subscription genuinely ended (cancelled, or payment finally failed
+        # past all retries) — Premium and future renewal commissions both
+        # stop here. Never leave premium=True forever just because it was
+        # never explicitly turned back off.
+        await db.users.update_one({"stripe_subscription_id": obj.get("id")}, {"$set": {"premium": False}})
+
     return {"status": "ok"}
 
 
