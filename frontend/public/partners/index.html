@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#0b0718" />
+    <meta name="description" content="Aura AI Partner Program — a private invitation to earn 30% recurring commission, with your own real-time dashboard." />
+    <link rel="icon" type="image/png" href="/icon-192.png" />
+    <link rel="apple-touch-icon" href="/icon-192.png" />
+    <title>Aura AI Partner Program</title>
+
+    <!-- Open Graph / social link previews -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Aura AI" />
+    <meta property="og:title" content="Aura AI Partner Program" />
+    <meta property="og:description" content="A private invitation to earn 30% recurring commission, with your own real-time dashboard." />
+    <meta property="og:image" content="https://aura-guidance.netlify.app/og-image.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:url" content="https://aura-guidance.netlify.app/partners/" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Aura AI Partner Program" />
+    <meta name="twitter:description" content="A private invitation to earn 30% recurring commission, with your own real-time dashboard." />
+    <meta name="twitter:image" content="https://aura-guidance.netlify.app/og-image.jpg" />
+
+    <style>
+      :root {
+        --void: #0b0718;
+        --surface: #14102a;
+        --surface-2: #1c1440;
+        --surface-3: #241a52;
+        --ink: #f4f1ff;
+        --ink-muted: #a79bd0;
+        --ink-faint: #6f6497;
+        --gold: #e7c46a;
+        --gold-soft: #f1d896;
+        --violet: #8a5cff;
+        --rose: #ff8fb1;
+        --line: rgba(244, 241, 255, 0.09);
+        --line-strong: rgba(244, 241, 255, 0.16);
+        --font-display: Georgia, "Iowan Old Style", "Palatino Linotype", "Times New Roman", serif;
+        --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        --font-mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+      }
+
+      * { box-sizing: border-box; }
+      html { background: var(--void); }
+
+      body {
+        background: var(--void);
+        color: var(--ink);
+        font-family: var(--font-body);
+        font-size: 16px;
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+        overflow-x: hidden;
+        margin: 0;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        * { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
+      }
+
+      a { color: var(--gold-soft); }
+
+      h1, h2, h3 { font-family: var(--font-display); font-weight: 400; text-wrap: balance; margin: 0; }
+
+      .page {
+        position: relative;
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 0 24px 96px;
+      }
+
+      /* ---------- ambient starfield (decorative, behind everything) ---------- */
+      .stars {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+        background-image:
+          radial-gradient(1.5px 1.5px at 12% 18%, rgba(244,241,255,0.55), transparent),
+          radial-gradient(1px 1px at 28% 62%, rgba(244,241,255,0.4), transparent),
+          radial-gradient(1.5px 1.5px at 45% 24%, rgba(244,241,255,0.5), transparent),
+          radial-gradient(1px 1px at 62% 78%, rgba(244,241,255,0.35), transparent),
+          radial-gradient(1.5px 1.5px at 78% 15%, rgba(244,241,255,0.5), transparent),
+          radial-gradient(1px 1px at 85% 55%, rgba(244,241,255,0.4), transparent),
+          radial-gradient(1.5px 1.5px at 6% 82%, rgba(244,241,255,0.45), transparent),
+          radial-gradient(1px 1px at 94% 88%, rgba(244,241,255,0.35), transparent),
+          radial-gradient(1.5px 1.5px at 35% 92%, rgba(244,241,255,0.4), transparent),
+          radial-gradient(1px 1px at 52% 8%, rgba(244,241,255,0.4), transparent);
+        background-repeat: no-repeat;
+        background-size: 100% 100%;
+        opacity: 0.9;
+      }
+
+      /* ---------- hero ---------- */
+      .hero {
+        position: relative;
+        z-index: 1;
+        padding: 88px 0 72px;
+        text-align: center;
+        overflow: hidden;
+      }
+
+      .hero::before {
+        content: "";
+        position: absolute;
+        top: -120px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 640px;
+        height: 640px;
+        max-width: 140vw;
+        background: radial-gradient(circle, rgba(138,92,255,0.28), rgba(255,143,177,0.14) 45%, transparent 70%);
+        filter: blur(2px);
+        z-index: -1;
+      }
+
+      .wordmark {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        font-family: var(--font-display);
+        font-size: 20px;
+        letter-spacing: 0.02em;
+        color: var(--ink);
+        margin-bottom: 40px;
+      }
+      .wordmark .dot {
+        width: 11px; height: 11px; border-radius: 50%;
+        background: conic-gradient(from 0deg, var(--gold), var(--rose), var(--violet), var(--gold));
+      }
+      .wordmark em { font-style: normal; background: linear-gradient(90deg, var(--gold-soft), var(--rose)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+      .eyebrow {
+        display: inline-block;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--gold-soft);
+        border: 1px solid rgba(231,196,106,0.35);
+        background: rgba(231,196,106,0.08);
+        border-radius: 999px;
+        padding: 7px 16px;
+        margin-bottom: 28px;
+      }
+
+      .hero h1 {
+        font-size: clamp(34px, 5.4vw, 54px);
+        line-height: 1.16;
+        max-width: 780px;
+        margin: 0 auto;
+        color: var(--ink);
+      }
+      .hero h1 .accent { color: var(--gold-soft); }
+
+      .hero p.lede {
+        max-width: 560px;
+        margin: 26px auto 0;
+        color: var(--ink-muted);
+        font-size: 17px;
+      }
+
+      /* ---------- content column with constellation thread ---------- */
+      .column {
+        position: relative;
+        max-width: 640px;
+        margin: 0 auto;
+        padding-left: 28px;
+      }
+      .column::before {
+        content: "";
+        position: absolute;
+        left: 3px;
+        top: 6px;
+        bottom: 6px;
+        width: 1px;
+        background: linear-gradient(180deg, transparent, var(--line-strong) 8%, var(--line-strong) 92%, transparent);
+      }
+
+      section.block {
+        position: relative;
+        padding: 56px 0;
+        border-top: 1px solid var(--line);
+      }
+      section.block:first-child { border-top: none; padding-top: 8px; }
+
+      section.block::before {
+        content: "";
+        position: absolute;
+        left: -28px;
+        top: 64px;
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--gold-soft);
+        box-shadow: 0 0 0 4px rgba(231,196,106,0.15);
+      }
+      section.block:first-child::before { top: 16px; }
+
+      .kicker {
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--violet);
+        margin-bottom: 14px;
+      }
+
+      h2 { font-size: 28px; color: var(--ink); margin-bottom: 18px; }
+      h2 + p { margin-top: 0; }
+
+      p { color: var(--ink-muted); margin: 14px 0; max-width: 62ch; }
+      p.lead { color: var(--ink); font-size: 17px; }
+
+      .feature-list { list-style: none; margin: 24px 0 0; padding: 0; display: grid; gap: 18px; }
+      .feature-list li {
+        display: grid;
+        grid-template-columns: 30px 1fr;
+        gap: 14px;
+        align-items: start;
+      }
+      .feature-list .mark {
+        width: 30px; height: 30px; border-radius: 9px;
+        display: grid; place-items: center;
+        background: var(--surface-2);
+        border: 1px solid var(--line-strong);
+        font-family: var(--font-display);
+        color: var(--gold-soft);
+        font-size: 15px;
+      }
+      .feature-list strong { color: var(--ink); font-weight: 600; display: block; margin-bottom: 3px; }
+      .feature-list span { color: var(--ink-muted); font-size: 15px; }
+
+      /* ---------- steps ---------- */
+      .steps { display: grid; gap: 22px; margin-top: 28px; }
+      .step {
+        display: grid;
+        grid-template-columns: 44px 1fr;
+        gap: 18px;
+        align-items: start;
+      }
+      .step .num {
+        font-family: var(--font-display);
+        font-size: 20px;
+        color: var(--void);
+        width: 44px; height: 44px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--gold-soft), var(--rose));
+        display: grid; place-items: center;
+        font-weight: 700;
+      }
+      .step h3 { font-size: 18px; color: var(--ink); margin-bottom: 6px; font-family: var(--font-body); font-weight: 700; }
+      .step p { margin: 0; font-size: 15px; }
+
+      /* ---------- commission banner ---------- */
+      .offer {
+        margin-top: 28px;
+        border-radius: 20px;
+        padding: 40px 32px;
+        background:
+          radial-gradient(120% 140% at 0% 0%, rgba(138,92,255,0.22), transparent 55%),
+          radial-gradient(120% 140% at 100% 100%, rgba(255,143,177,0.16), transparent 55%),
+          var(--surface);
+        border: 1px solid rgba(231,196,106,0.25);
+        text-align: center;
+      }
+      .offer .num {
+        font-family: var(--font-display);
+        font-size: 84px;
+        line-height: 1;
+        background: linear-gradient(90deg, var(--gold-soft), var(--rose));
+        -webkit-background-clip: text; background-clip: text; color: transparent;
+      }
+      .offer .num sup { font-size: 34px; top: -0.5em; }
+      .offer .caption { font-size: 17px; color: var(--ink); margin-top: 6px; font-weight: 600; }
+      .offer .fine { font-size: 14px; color: var(--ink-muted); margin-top: 14px; max-width: 46ch; margin-left: auto; margin-right: auto; }
+
+      /* ---------- mock dashboard ---------- */
+      .panel-frame { margin-top: 28px; }
+      .panel-label {
+        display: flex; align-items: center; justify-content: space-between;
+        margin-bottom: 12px;
+      }
+      .panel-label .tag {
+        font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
+        color: var(--ink-faint); border: 1px solid var(--line-strong);
+        border-radius: 999px; padding: 4px 10px;
+      }
+      .panel {
+        background: var(--surface);
+        border: 1px solid var(--line-strong);
+        border-radius: 20px;
+        padding: 24px;
+      }
+      .panel-row {
+        display: flex; align-items: center; justify-content: space-between;
+        gap: 12px;
+        background: var(--surface-2);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 14px 16px;
+        font-family: var(--font-mono);
+        font-size: 13px;
+        color: var(--ink);
+        margin-bottom: 18px;
+      }
+      .panel-row .copy { color: var(--gold-soft); font-family: var(--font-body); font-size: 12px; font-weight: 700; white-space: nowrap; }
+      .panel-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 18px; }
+      .stat-card {
+        background: var(--surface-2);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 16px 8px;
+        text-align: center;
+      }
+      .stat-card .v { font-family: var(--font-display); font-size: 24px; color: var(--ink); font-variant-numeric: tabular-nums; }
+      .stat-card .l { font-size: 11px; color: var(--ink-faint); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.06em; }
+      .owed-card {
+        background: linear-gradient(135deg, rgba(231,196,106,0.14), rgba(138,92,255,0.1));
+        border: 1px solid rgba(231,196,106,0.3);
+        border-radius: 14px;
+        padding: 18px 20px;
+        display: flex; align-items: center; justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+      .owed-card .l { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold-soft); font-weight: 700; }
+      .owed-card .v { font-family: var(--font-display); font-size: 30px; color: var(--ink); margin-top: 2px; }
+      .owed-card button {
+        font-family: var(--font-body);
+        font-weight: 700; font-size: 13px;
+        color: var(--void);
+        background: linear-gradient(135deg, var(--gold-soft), var(--rose));
+        border: none; border-radius: 12px;
+        padding: 12px 20px;
+        cursor: default;
+      }
+      .illustrative-note { font-size: 12px; color: var(--ink-faint); margin-top: 14px; text-align: center; }
+
+      /* ---------- payout mechanics ---------- */
+      .mech-list { display: grid; gap: 16px; margin-top: 24px; }
+      .mech-list > div {
+        display: grid; grid-template-columns: 20px 1fr; gap: 12px;
+        font-size: 15px; color: var(--ink-muted);
+      }
+      .mech-list > div::before {
+        content: "—"; color: var(--ink-faint);
+      }
+      .mech-list strong { color: var(--ink); }
+
+      /* ---------- closing ---------- */
+      .closing {
+        position: relative;
+        z-index: 1;
+        max-width: 640px;
+        margin: 40px auto 0;
+        text-align: center;
+        padding: 64px 32px;
+        border-radius: 24px;
+        background:
+          radial-gradient(140% 160% at 50% 0%, rgba(138,92,255,0.2), transparent 60%),
+          var(--surface);
+        border: 1px solid var(--line-strong);
+      }
+      .closing h2 { font-size: 32px; }
+      .closing p { max-width: 44ch; margin-left: auto; margin-right: auto; }
+      .closing .cta {
+        display: inline-block;
+        margin-top: 24px;
+        font-weight: 700;
+        font-size: 15px;
+        color: var(--void);
+        background: linear-gradient(135deg, var(--gold-soft), var(--rose));
+        border-radius: 999px;
+        padding: 15px 32px;
+        text-decoration: none;
+      }
+      .closing .footnote { font-size: 13px; color: var(--ink-faint); margin-top: 22px; }
+
+      footer.pagefoot {
+        position: relative; z-index: 1;
+        text-align: center;
+        padding: 40px 0 8px;
+        color: var(--ink-faint);
+        font-size: 13px;
+      }
+
+      @media (max-width: 620px) {
+        .hero { padding: 64px 0 48px; }
+        .column { padding-left: 22px; }
+        section.block::before { left: -22px; }
+        .offer { padding: 32px 20px; }
+        .offer .num { font-size: 64px; }
+        .panel-stats { gap: 8px; }
+        .stat-card .v { font-size: 20px; }
+        .owed-card { flex-direction: column; align-items: flex-start; }
+      }
+    </style>
+  </head>
+  <body>
+
+    <div class="stars" aria-hidden="true"></div>
+
+    <div class="page">
+
+      <header class="hero">
+        <div class="wordmark"><span class="dot"></span>Aura<em>AI</em></div>
+        <span class="eyebrow">Partner Program</span>
+        <h1>Your audience already trusts the stars.<br>Now they can trust <span class="accent">your recommendation</span>, too.</h1>
+        <p class="lede">This is your invitation to become an official Aura AI partner — a private, tracked link, a real-time dashboard, and a recurring share of every reading you bring in.</p>
+      </header>
+
+      <div class="column">
+
+        <section class="block">
+          <div class="kicker">What is Aura AI</div>
+          <h2>An AI astrology companion, built to feel personal.</h2>
+          <p class="lead">Aura AI pairs people with AI astrologer personas for one-on-one guidance, generates readings from their actual birth chart, and creates the Soulmate Sketch — a mystical AI-rendered portrait of a compatible match, paired with a real compatibility breakdown across love, career, and communication.</p>
+          <ul class="feature-list">
+            <li><span class="mark">✦</span><div><strong>Guided AI conversations</strong><span>Chat with specialized astrologer personas, available any time, tuned to the person's own chart.</span></div></li>
+            <li><span class="mark">☾</span><div><strong>Personalized readings</strong><span>Every reading is generated from the person's real birth date — never generic horoscope copy.</span></div></li>
+            <li><span class="mark">♡</span><div><strong>The Soulmate Sketch</strong><span>An AI-illustrated portrait of a compatible match, unlocked with a real compatibility score.</span></div></li>
+          </ul>
+        </section>
+
+        <section class="block">
+          <div class="kicker">Why this works for you</div>
+          <h2>You're not renting out your feed. You're vouching for something.</h2>
+          <p>Your audience already comes to you for a read on what the stars are saying. A generic ad interrupts that relationship — a genuine recommendation extends it. When you point people to Aura AI, you're not selling space, you're lending trust to a product built for exactly the audience you already have.</p>
+        </section>
+
+        <section class="block">
+          <div class="kicker">Why it's more than an app</div>
+          <h2>It doesn't replace what you do. It keeps people coming back to it.</h2>
+          <p>Most people who care about astrology don't experience it once — they come back to it in small moments, on an ordinary Tuesday, when they need a read on something in their life. Aura AI exists for those in-between moments: it doesn't compete with the depth of a real reading from a real professional, it's the daily companion that keeps someone engaged with astrology between the times they seek you out specifically. That's the part that benefits you directly — an audience that stays curious stays your audience.</p>
+        </section>
+
+        <section class="block">
+          <div class="kicker">How it works</div>
+          <h2>Three steps. No technical setup.</h2>
+          <div class="steps">
+            <div class="step">
+              <div class="num">1</div>
+              <div><h3>Get your link</h3><p>A unique tracking link, generated for you alone. It never expires and never needs to be recreated.</p></div>
+            </div>
+            <div class="step">
+              <div class="num">2</div>
+              <div><h3>Share it your way</h3><p>Bio link, story, post, direct message — wherever you already talk to your audience.</p></div>
+            </div>
+            <div class="step">
+              <div class="num">3</div>
+              <div><h3>Get paid, on repeat</h3><p>Every person who joins through your link is tied to you permanently — you earn on their first payment and every renewal after it.</p></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="block">
+          <div class="kicker">The offer</div>
+          <h2>Recurring, not one-time.</h2>
+          <div class="offer">
+            <div class="num">30<sup>%</sup></div>
+            <div class="caption">of every payment, for as long as they stay subscribed</div>
+            <p class="fine">Most affiliate programs pay once, on the first sale. Aura AI pays on the first sale <em>and</em> every renewal after it — for as long as the person you referred remains a subscriber. Bring one person in once, and it keeps paying.</p>
+          </div>
+        </section>
+
+        <section class="block">
+          <div class="kicker">What you're risking</div>
+          <h2>Nothing. That's not a figure of speech.</h2>
+          <ul class="feature-list">
+            <li><span class="mark">✓</span><div><strong>Free to join, no cost ever</strong><span>There's no fee, no minimum, nothing to buy in. If it's not for you, you simply never use the link.</span></div></li>
+            <li><span class="mark">✓</span><div><strong>Try it yourself first, free</strong><span>Before recommending anything, you get full Premium access on us — so what you tell your audience is something you've actually used, not just read about.</span></div></li>
+            <li><span class="mark">✓</span><div><strong>Your name, your call</strong><span>Post it however and wherever fits you — a bio link, a story, a single mention. There's no script to follow and no schedule to keep.</span></div></li>
+          </ul>
+        </section>
+
+        <section class="block">
+          <div class="kicker">Your dashboard</div>
+          <h2>Everything you need to track it, in one private page.</h2>
+          <p>No login, no app to install — just your own link, bookmarked once. It updates in real time as clicks turn into signups turn into earnings.</p>
+          <div class="panel-frame">
+            <div class="panel-label"><span class="tag">Illustrative example</span></div>
+            <div class="panel">
+              <div class="panel-row"><span>aura-guidance.netlify.app/?ref=your-name</span><span class="copy">COPY</span></div>
+              <div class="panel-stats">
+                <div class="stat-card"><div class="v">248</div><div class="l">Clicks</div></div>
+                <div class="stat-card"><div class="v">31</div><div class="l">Signups</div></div>
+                <div class="stat-card"><div class="v">12%</div><div class="l">Conversion</div></div>
+              </div>
+              <div class="owed-card">
+                <div><div class="l">Available to withdraw</div><div class="v">$186.30</div></div>
+                <button type="button">Request payout</button>
+              </div>
+            </div>
+            <p class="illustrative-note">Numbers above are for illustration only — your real dashboard starts at zero and fills in as your link is used.</p>
+          </div>
+        </section>
+
+        <section class="block">
+          <div class="kicker">Getting paid</div>
+          <h2>Simple, honest, manual — on purpose.</h2>
+          <p>There's no automatic bank transfer, and we'd rather tell you that upfront than overpromise. When you request a payout from your dashboard, it's reviewed and sent by hand within a few days — so every payment is a real person confirming a real transfer, not a black box.</p>
+          <div class="mech-list">
+            <div><span><strong>Request anytime</strong> — from your dashboard, whenever your available balance is worth withdrawing.</span></div>
+            <div><span><strong>Paid within 3 business days</strong> — via Wise, bank transfer, or Pix, whichever works for where you are.</span></div>
+            <div><span><strong>Full history kept</strong> — every payout you've requested and received stays visible on your dashboard.</span></div>
+          </div>
+        </section>
+
+      </div>
+
+      <div class="closing">
+        <h2>Ready to start?</h2>
+        <p>Reach out to whoever sent you this to receive your personal invite — your link and dashboard are both already inside it, ready within minutes.</p>
+        <span class="cta">Let's talk</span>
+        <p class="footnote">Aura AI Partner Program · Private invitation, not a public offer</p>
+      </div>
+
+      <footer class="pagefoot">Aura AI</footer>
+
+    </div>
+  </body>
+</html>
