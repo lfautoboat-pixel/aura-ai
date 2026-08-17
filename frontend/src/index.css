@@ -76,6 +76,10 @@ body {
 
 .star { position:absolute; background:#fff; border-radius:50%; animation: twinkle 3s ease-in-out infinite; }
 
+@media (prefers-reduced-motion: reduce) {
+  .rise, .spin-slow, .floaty, .star { animation: none !important; }
+}
+
 /* hide scrollbars in chat */
 .no-sb::-webkit-scrollbar { display:none; }
 .no-sb { -ms-overflow-style:none; scrollbar-width:none; }

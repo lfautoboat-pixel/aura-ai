@@ -1,9 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronLeft, Copy, Check, Pause, Play, RefreshCw, Users, MousePointerClick, Wallet, Loader2 } from "lucide-react";
+import { ChevronLeft, Copy, Check, Pause, Play, RefreshCw, Trash2, Users, MousePointerClick, Wallet, Loader2, Sparkles } from "lucide-react";
 import api from "../api";
 import { useAuth } from "../store";
 import { referralLink } from "../partnerConfig";
+
+const POLL_MS = 30000;
 
 function CopyField({ label, value }) {
   const [copied, setCopied] = useState(false);
@@ -40,6 +42,19 @@ function currencyMap(obj) {
   return entries.map(([cur, amt]) => money(amt, cur)).join(" + ");
 }
 
+function useAgo(timestamp) {
+  const [, force] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => force((x) => x + 1), 1000);
+    return () => clearInterval(id);
+  }, []);
+  if (!timestamp) return "";
+  const secs = Math.max(0, Math.round((Date.now() - timestamp) / 1000));
+  if (secs < 5) return "agora";
+  if (secs < 60) return `há ${secs}s`;
+  return `há ${Math.round(secs / 60)}min`;
+}
+
 export default function PartnerAdmin() {
   const nav = useNavigate();
   const { user, loading: authLoading } = useAuth();
@@ -52,10 +67,12 @@ export default function PartnerAdmin() {
   const [error, setError] = useState("");
   const [busyId, setBusyId] = useState(null);
   const [regenerated, setRegenerated] = useState({});
+  const [lastSync, setLastSync] = useState(null);
+  const syncAgo = useAgo(lastSync);
 
   const loadAll = () => {
     Promise.all([api.get("/admin/partners"), api.get("/admin/payouts")])
-      .then(([p, o]) => { setPartners(p.data); setPayouts(o.data); setAccess("granted"); })
+      .then(([p, o]) => { setPartners(p.data); setPayouts(o.data); setAccess("granted"); setLastSync(Date.now()); })
       .catch((e) => setAccess(e?.response?.status === 401 || e?.response?.status === 403 ? "denied" : "error"));
   };
 
@@ -65,6 +82,18 @@ export default function PartnerAdmin() {
     loadAll();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authLoading, user]);
+
+  // Live-updating list: a solo operator checking in on partner activity
+  // shouldn't have to remember to hit refresh. Paused while the tab isn't
+  // visible so it never burns calls on a backgrounded browser tab.
+  useEffect(() => {
+    if (access !== "granted") return;
+    const tick = () => { if (document.visibilityState === "visible") loadAll(); };
+    const id = setInterval(tick, POLL_MS);
+    document.addEventListener("visibilitychange", tick);
+    return () => { clearInterval(id); document.removeEventListener("visibilitychange", tick); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [access]);
 
   const createPartner = async (e) => {
     e.preventDefault();
@@ -91,6 +120,15 @@ export default function PartnerAdmin() {
     setBusyId(p.id);
     try {
       await api.patch(`/admin/partners/${p.id}`, { status: p.status === "active" ? "paused" : "active" });
+      loadAll();
+    } finally { setBusyId(null); }
+  };
+
+  const deletePartner = async (p) => {
+    if (!window.confirm(`Apagar "${p.name}" permanentemente? Isso remove o parceiro e todo o histórico de ganhos/saques dele(a). Não dá pra desfazer.`)) return;
+    setBusyId(p.id);
+    try {
+      await api.delete(`/admin/partners/${p.id}`);
       loadAll();
     } finally { setBusyId(null); }
   };
@@ -131,9 +169,17 @@ export default function PartnerAdmin() {
 
   return (
     <div className="app-frame cosmic-bg min-h-screen pb-16">
-      <div className="p-5 flex items-center gap-3 sticky top-0 z-10 backdrop-blur-md bg-[#0b0718]/70">
-        <button onClick={() => nav("/app")}><ChevronLeft /></button>
-        <h1 className="font-display text-xl">Parceiros</h1>
+      <div className="p-5 flex items-center justify-between sticky top-0 z-10 backdrop-blur-md bg-[#0b0718]/70">
+        <div className="flex items-center gap-3">
+          <button onClick={() => nav("/app")}><ChevronLeft /></button>
+          <h1 className="font-display text-xl">Parceiros</h1>
+        </div>
+        {lastSync && (
+          <span className="flex items-center gap-1.5 text-white/30 text-[11px]">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            atualizado {syncAgo}
+          </span>
+        )}
       </div>
 
       <div className="px-5 space-y-8">
@@ -167,10 +213,17 @@ export default function PartnerAdmin() {
 
         {justCreated && (
           <section className="glass rounded-2xl p-4 border border-amber-400/40 space-y-3">
-            <p className="text-amber-300 text-xs font-bold uppercase tracking-wider">Copie agora — o link do painel não aparece de novo</p>
-            <p className="text-white/70 text-sm">Parceiro <strong>{justCreated.name}</strong> criado. Envie os dois links abaixo para ele(a).</p>
-            <CopyField label="Link de divulgação (o que o parceiro compartilha)" value={referralLink(justCreated.code)} />
-            <CopyField label="Painel do parceiro (privado, sem login)" value={`${window.location.origin}/partner/${justCreated.dashboard_token}`} />
+            <p className="text-amber-300 text-xs font-bold uppercase tracking-wider flex items-center gap-1.5">
+              <Sparkles size={13} /> Copie agora — este link não aparece de novo
+            </p>
+            <p className="text-white/70 text-sm">
+              Parceiro <strong>{justCreated.name}</strong> criado. Mande só o link abaixo — é o convite completo, o link de divulgação já vem pronto pra copiar de dentro do painel dela(e).
+            </p>
+            <CopyField label="Convite / painel do parceiro — o único link que você precisa enviar" value={`${window.location.origin}/partner/${justCreated.dashboard_token}`} />
+            <details className="text-white/40 text-xs">
+              <summary className="cursor-pointer">Ver link de divulgação (referência sua — não precisa enviar)</summary>
+              <div className="mt-2"><CopyField value={referralLink(justCreated.code)} /></div>
+            </details>
             <button onClick={() => setJustCreated(null)} className="text-white/40 text-xs underline">Fechar</button>
           </section>
         )}
@@ -192,44 +245,51 @@ export default function PartnerAdmin() {
                     </div>
                     <div className="text-white/40 text-xs mt-0.5">{p.code} · {Math.round(p.commission_rate * 100)}% comissão{p.contact ? ` · ${p.contact}` : ""}</div>
                   </div>
-                  <button onClick={() => toggleStatus(p)} disabled={busyId === p.id}
-                    className="glass rounded-lg p-2 border border-white/10 shrink-0" title={p.status === "active" ? "Pausar" : "Ativar"}>
-                    {p.status === "active" ? <Pause size={14} /> : <Play size={14} />}
-                  </button>
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <button onClick={() => toggleStatus(p)} disabled={busyId === p.id}
+                      className="glass rounded-lg p-2 border border-white/10" title={p.status === "active" ? "Pausar" : "Ativar"}>
+                      {p.status === "active" ? <Pause size={14} /> : <Play size={14} />}
+                    </button>
+                    <button onClick={() => deletePartner(p)} disabled={busyId === p.id}
+                      className="glass rounded-lg p-2 border border-white/10 hover:border-rose-400/50 hover:text-rose-400" title="Apagar permanentemente">
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-3 gap-2 mt-3">
                   <div className="glass rounded-xl p-2.5 text-center">
                     <MousePointerClick size={14} className="mx-auto text-white/40" />
-                    <div className="font-display text-lg mt-1">{p.clicks}</div>
+                    <div className="font-display text-lg mt-1 tabular-nums">{p.clicks}</div>
                     <div className="text-white/40 text-[10px]">cliques</div>
                   </div>
                   <div className="glass rounded-xl p-2.5 text-center">
                     <Users size={14} className="mx-auto text-white/40" />
-                    <div className="font-display text-lg mt-1">{p.signups}</div>
+                    <div className="font-display text-lg mt-1 tabular-nums">{p.signups}</div>
                     <div className="text-white/40 text-[10px]">cadastros</div>
                   </div>
                   <div className="glass rounded-xl p-2.5 text-center">
                     <Wallet size={14} className="mx-auto text-white/40" />
-                    <div className="font-display text-sm mt-1.5">{currencyMap(p.earnings_owed)}</div>
+                    <div className="font-display text-sm mt-1.5 tabular-nums">{currencyMap(p.earnings_owed)}</div>
                     <div className="text-white/40 text-[10px]">a pagar</div>
                   </div>
                 </div>
                 <div className="text-white/30 text-[11px] mt-2">Total gerado (histórico): {currencyMap(p.earnings_total)}</div>
 
-                <div className="mt-3">
-                  <CopyField value={referralLink(p.code)} />
-                </div>
                 {regenerated[p.id] ? (
                   <div className="mt-2">
-                    <CopyField label="Novo link do painel — copie e envie agora" value={`${window.location.origin}/partner/${regenerated[p.id]}`} />
+                    <CopyField label="Novo link do convite/painel — copie e envie agora" value={`${window.location.origin}/partner/${regenerated[p.id]}`} />
                   </div>
                 ) : (
                   <button onClick={() => regenerateLink(p)} disabled={busyId === p.id}
                     className="mt-2 text-white/40 text-xs flex items-center gap-1.5 hover:text-white/70">
-                    <RefreshCw size={12} /> Gerar link do painel (perdeu o original?)
+                    <RefreshCw size={12} /> Gerar novo link do convite (perdeu o original?)
                   </button>
                 )}
+                <details className="mt-2 text-white/30 text-[11px]">
+                  <summary className="cursor-pointer">Link de divulgação (referência)</summary>
+                  <div className="mt-1.5"><CopyField value={referralLink(p.code)} /></div>
+                </details>
               </div>
             ))}
           </div>

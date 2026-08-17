@@ -1266,6 +1266,21 @@ async def update_partner(partner_id: str, body: PartnerUpdate, admin=Depends(req
     return _partner_public(p)
 
 
+@api.delete("/admin/partners/{partner_id}")
+async def delete_partner(partner_id: str, admin=Depends(require_admin)):
+    """A real delete, not a soft one — for wiping test partners cleanly.
+    Cascades to the partner's ledger and payout history so no orphaned test
+    data lingers; any user still carrying this partner's code in referred_by
+    simply stops earning anyone commission from here on (the code no longer
+    resolves to an active partner)."""
+    result = await db.partners.delete_one({"id": partner_id})
+    if result.deleted_count == 0:
+        raise HTTPException(404, "Partner not found")
+    await db.partner_earnings.delete_many({"partner_id": partner_id})
+    await db.payout_requests.delete_many({"partner_id": partner_id})
+    return {"deleted": True}
+
+
 @api.post("/admin/partners/{partner_id}/regenerate-link")
 async def regenerate_partner_link(partner_id: str, admin=Depends(require_admin)):
     """Safety net for a solo non-technical operator: the dashboard_token is
@@ -1652,6 +1667,15 @@ async def _credit_partner_commission(user: dict, amount: int, currency: str, sou
         return
     partner = await db.partners.find_one({"code": code, "status": "active"}, {"_id": 0})
     if not partner:
+        return
+    # Self-referral guard: a partner signing up as their own customer (same
+    # email on file as their contact) would otherwise let them farm 30% of
+    # their own spend back out of the business. Contact isn't always an
+    # email (TikTok handles etc.), so only compare when it plainly is one —
+    # this is a best-effort deterrent, not a guarantee against a partner
+    # using a second email, but it closes the obvious case for free.
+    contact = (partner.get("contact") or "").strip().lower()
+    if contact and re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", contact) and contact == (user.get("email") or "").strip().lower():
         return
     commission = round(amount * partner["commission_rate"])
     await db.partner_earnings.insert_one({
