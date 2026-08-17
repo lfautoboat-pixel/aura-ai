@@ -58,7 +58,7 @@
       }
 
       @media (prefers-reduced-motion: reduce) {
-        * { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
+        *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
       }
 
       a { color: var(--gold-soft); }
@@ -72,26 +72,35 @@
         padding: 0 24px 96px;
       }
 
-      /* ---------- ambient starfield (decorative, behind everything) ---------- */
-      .stars {
+      /* ---------- ambient starfield, two depth layers for real parallax ---------- */
+      .stars-layer {
         position: fixed;
         inset: 0;
         z-index: 0;
         pointer-events: none;
-        background-image:
-          radial-gradient(1.5px 1.5px at 12% 18%, rgba(244,241,255,0.55), transparent),
-          radial-gradient(1px 1px at 28% 62%, rgba(244,241,255,0.4), transparent),
-          radial-gradient(1.5px 1.5px at 45% 24%, rgba(244,241,255,0.5), transparent),
-          radial-gradient(1px 1px at 62% 78%, rgba(244,241,255,0.35), transparent),
-          radial-gradient(1.5px 1.5px at 78% 15%, rgba(244,241,255,0.5), transparent),
-          radial-gradient(1px 1px at 85% 55%, rgba(244,241,255,0.4), transparent),
-          radial-gradient(1.5px 1.5px at 6% 82%, rgba(244,241,255,0.45), transparent),
-          radial-gradient(1px 1px at 94% 88%, rgba(244,241,255,0.35), transparent),
-          radial-gradient(1.5px 1.5px at 35% 92%, rgba(244,241,255,0.4), transparent),
-          radial-gradient(1px 1px at 52% 8%, rgba(244,241,255,0.4), transparent);
         background-repeat: no-repeat;
         background-size: 100% 100%;
+        will-change: transform;
+      }
+      .stars-far {
+        opacity: 0.55;
+        background-image:
+          radial-gradient(1.2px 1.2px at 10% 20%, rgba(244,241,255,0.5), transparent),
+          radial-gradient(1px 1px at 30% 70%, rgba(244,241,255,0.4), transparent),
+          radial-gradient(1.2px 1.2px at 70% 30%, rgba(244,241,255,0.45), transparent),
+          radial-gradient(1px 1px at 88% 60%, rgba(244,241,255,0.35), transparent),
+          radial-gradient(1.2px 1.2px at 50% 85%, rgba(244,241,255,0.4), transparent);
+      }
+      .stars-near {
         opacity: 0.9;
+        background-image:
+          radial-gradient(1.6px 1.6px at 15% 15%, rgba(244,241,255,0.6), transparent),
+          radial-gradient(1.4px 1.4px at 42% 60%, rgba(244,241,255,0.5), transparent),
+          radial-gradient(1.6px 1.6px at 62% 22%, rgba(244,241,255,0.55), transparent),
+          radial-gradient(1.4px 1.4px at 80% 78%, rgba(244,241,255,0.45), transparent),
+          radial-gradient(1.6px 1.6px at 8% 82%, rgba(244,241,255,0.5), transparent),
+          radial-gradient(1.4px 1.4px at 95% 45%, rgba(244,241,255,0.4), transparent),
+          radial-gradient(1.6px 1.6px at 34% 92%, rgba(244,241,255,0.45), transparent);
       }
 
       /* ---------- hero ---------- */
@@ -103,7 +112,7 @@
         overflow: hidden;
       }
 
-      .hero::before {
+      .aura-glow {
         content: "";
         position: absolute;
         top: -120px;
@@ -115,6 +124,7 @@
         background: radial-gradient(circle, rgba(138,92,255,0.28), rgba(255,143,177,0.14) 45%, transparent 70%);
         filter: blur(2px);
         z-index: -1;
+        will-change: transform;
       }
 
       .wordmark {
@@ -130,7 +140,9 @@
       .wordmark .dot {
         width: 11px; height: 11px; border-radius: 50%;
         background: conic-gradient(from 0deg, var(--gold), var(--rose), var(--violet), var(--gold));
+        animation: spin 6s linear infinite;
       }
+      @keyframes spin { to { transform: rotate(360deg); } }
       .wordmark em { font-style: normal; background: linear-gradient(90deg, var(--gold-soft), var(--rose)); -webkit-background-clip: text; background-clip: text; color: transparent; }
 
       .eyebrow {
@@ -170,14 +182,20 @@
         margin: 0 auto;
         padding-left: 28px;
       }
-      .column::before {
-        content: "";
+      .thread {
         position: absolute;
         left: 3px;
         top: 6px;
         bottom: 6px;
         width: 1px;
-        background: linear-gradient(180deg, transparent, var(--line-strong) 8%, var(--line-strong) 92%, transparent);
+        background: var(--line);
+      }
+      .thread-fill {
+        position: absolute;
+        inset: 0;
+        transform-origin: top;
+        transform: scaleY(0);
+        background: linear-gradient(180deg, transparent, var(--gold-soft) 8%, var(--violet) 55%, var(--rose) 92%, transparent);
       }
 
       section.block {
@@ -266,6 +284,7 @@
           var(--surface);
         border: 1px solid rgba(231,196,106,0.25);
         text-align: center;
+        perspective: 900px;
       }
       .offer .num {
         font-family: var(--font-display);
@@ -273,13 +292,14 @@
         line-height: 1;
         background: linear-gradient(90deg, var(--gold-soft), var(--rose));
         -webkit-background-clip: text; background-clip: text; color: transparent;
+        font-variant-numeric: tabular-nums;
       }
       .offer .num sup { font-size: 34px; top: -0.5em; }
       .offer .caption { font-size: 17px; color: var(--ink); margin-top: 6px; font-weight: 600; }
       .offer .fine { font-size: 14px; color: var(--ink-muted); margin-top: 14px; max-width: 46ch; margin-left: auto; margin-right: auto; }
 
       /* ---------- mock dashboard ---------- */
-      .panel-frame { margin-top: 28px; }
+      .panel-frame { margin-top: 28px; perspective: 1200px; }
       .panel-label {
         display: flex; align-items: center; justify-content: space-between;
         margin-bottom: 12px;
@@ -294,6 +314,9 @@
         border: 1px solid var(--line-strong);
         border-radius: 20px;
         padding: 24px;
+        transform-style: preserve-3d;
+        will-change: transform;
+        box-shadow: 0 30px 60px -20px rgba(0,0,0,0.5);
       }
       .panel-row {
         display: flex; align-items: center; justify-content: space-between;
@@ -368,16 +391,26 @@
       .closing h2 { font-size: 32px; }
       .closing p { max-width: 44ch; margin-left: auto; margin-right: auto; }
       .closing .cta {
-        display: inline-block;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
         margin-top: 24px;
         font-weight: 700;
         font-size: 15px;
+        font-family: inherit;
         color: var(--void);
         background: linear-gradient(135deg, var(--gold-soft), var(--rose));
+        border: none;
         border-radius: 999px;
         padding: 15px 32px;
-        text-decoration: none;
+        cursor: pointer;
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
+        box-shadow: 0 14px 30px -12px rgba(231,196,106,0.4);
       }
+      .closing .cta:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 18px 36px -12px rgba(231,196,106,0.5); }
+      .closing .cta:active { transform: translateY(0) scale(0.98); }
+      .closing .cta.confirmed { background: linear-gradient(135deg, #7de3a8, var(--gold-soft)); cursor: default; }
+      .closing .cta svg { width: 16px; height: 16px; }
       .closing .footnote { font-size: 13px; color: var(--ink-faint); margin-top: 22px; }
 
       footer.pagefoot {
@@ -402,11 +435,13 @@
   </head>
   <body>
 
-    <div class="stars" aria-hidden="true"></div>
+    <div class="stars-layer stars-far" aria-hidden="true"></div>
+    <div class="stars-layer stars-near" aria-hidden="true"></div>
 
     <div class="page">
 
       <header class="hero">
+        <div class="aura-glow" aria-hidden="true"></div>
         <div class="wordmark"><span class="dot"></span>Aura<em>AI</em></div>
         <span class="eyebrow">Partner Program</span>
         <h1>Your audience already trusts the stars.<br>Now they can trust <span class="accent">your recommendation</span>, too.</h1>
@@ -414,84 +449,85 @@
       </header>
 
       <div class="column">
+        <div class="thread" aria-hidden="true"><div class="thread-fill"></div></div>
 
-        <section class="block">
+        <section class="block reveal">
           <div class="kicker">What is Aura AI</div>
           <h2>An AI astrology companion, built to feel personal.</h2>
           <p class="lead">Aura AI pairs people with AI astrologer personas for one-on-one guidance, generates readings from their actual birth chart, and creates the Soulmate Sketch — a mystical AI-rendered portrait of a compatible match, paired with a real compatibility breakdown across love, career, and communication.</p>
           <ul class="feature-list">
-            <li><span class="mark">✦</span><div><strong>Guided AI conversations</strong><span>Chat with specialized astrologer personas, available any time, tuned to the person's own chart.</span></div></li>
-            <li><span class="mark">☾</span><div><strong>Personalized readings</strong><span>Every reading is generated from the person's real birth date — never generic horoscope copy.</span></div></li>
-            <li><span class="mark">♡</span><div><strong>The Soulmate Sketch</strong><span>An AI-illustrated portrait of a compatible match, unlocked with a real compatibility score.</span></div></li>
+            <li class="reveal-item"><span class="mark">✦</span><div><strong>Guided AI conversations</strong><span>Chat with specialized astrologer personas, available any time, tuned to the person's own chart.</span></div></li>
+            <li class="reveal-item"><span class="mark">☾</span><div><strong>Personalized readings</strong><span>Every reading is generated from the person's real birth date — never generic horoscope copy.</span></div></li>
+            <li class="reveal-item"><span class="mark">♡</span><div><strong>The Soulmate Sketch</strong><span>An AI-illustrated portrait of a compatible match, unlocked with a real compatibility score.</span></div></li>
           </ul>
         </section>
 
-        <section class="block">
+        <section class="block reveal">
           <div class="kicker">Why this works for you</div>
           <h2>You're not renting out your feed. You're vouching for something.</h2>
           <p>Your audience already comes to you for a read on what the stars are saying. A generic ad interrupts that relationship — a genuine recommendation extends it. When you point people to Aura AI, you're not selling space, you're lending trust to a product built for exactly the audience you already have.</p>
         </section>
 
-        <section class="block">
+        <section class="block reveal">
           <div class="kicker">Why it's more than an app</div>
           <h2>It doesn't replace what you do. It keeps people coming back to it.</h2>
           <p>Most people who care about astrology don't experience it once — they come back to it in small moments, on an ordinary Tuesday, when they need a read on something in their life. Aura AI exists for those in-between moments: it doesn't compete with the depth of a real reading from a real professional, it's the daily companion that keeps someone engaged with astrology between the times they seek you out specifically. That's the part that benefits you directly — an audience that stays curious stays your audience.</p>
         </section>
 
-        <section class="block">
+        <section class="block reveal">
           <div class="kicker">How it works</div>
           <h2>Three steps. No technical setup.</h2>
           <div class="steps">
-            <div class="step">
+            <div class="step reveal-item">
               <div class="num">1</div>
               <div><h3>Get your link</h3><p>A unique tracking link, generated for you alone. It never expires and never needs to be recreated.</p></div>
             </div>
-            <div class="step">
+            <div class="step reveal-item">
               <div class="num">2</div>
               <div><h3>Share it your way</h3><p>Bio link, story, post, direct message — wherever you already talk to your audience.</p></div>
             </div>
-            <div class="step">
+            <div class="step reveal-item">
               <div class="num">3</div>
               <div><h3>Get paid, on repeat</h3><p>Every person who joins through your link is tied to you permanently — you earn on their first payment and every renewal after it.</p></div>
             </div>
           </div>
         </section>
 
-        <section class="block">
+        <section class="block reveal">
           <div class="kicker">The offer</div>
           <h2>Recurring, not one-time.</h2>
-          <div class="offer">
-            <div class="num">30<sup>%</sup></div>
+          <div class="offer tilt">
+            <div class="num"><span class="counter" data-target="30">0</span><sup>%</sup></div>
             <div class="caption">of every payment, for as long as they stay subscribed</div>
             <p class="fine">Most affiliate programs pay once, on the first sale. Aura AI pays on the first sale <em>and</em> every renewal after it — for as long as the person you referred remains a subscriber. Bring one person in once, and it keeps paying.</p>
           </div>
         </section>
 
-        <section class="block">
+        <section class="block reveal">
           <div class="kicker">What you're risking</div>
           <h2>Nothing. That's not a figure of speech.</h2>
           <ul class="feature-list">
-            <li><span class="mark">✓</span><div><strong>Free to join, no cost ever</strong><span>There's no fee, no minimum, nothing to buy in. If it's not for you, you simply never use the link.</span></div></li>
-            <li><span class="mark">✓</span><div><strong>Try it yourself first, free</strong><span>Before recommending anything, you get full Premium access on us — so what you tell your audience is something you've actually used, not just read about.</span></div></li>
-            <li><span class="mark">✓</span><div><strong>Your name, your call</strong><span>Post it however and wherever fits you — a bio link, a story, a single mention. There's no script to follow and no schedule to keep.</span></div></li>
+            <li class="reveal-item"><span class="mark">✓</span><div><strong>Free to join, no cost ever</strong><span>There's no fee, no minimum, nothing to buy in. If it's not for you, you simply never use the link.</span></div></li>
+            <li class="reveal-item"><span class="mark">✓</span><div><strong>Try it yourself first, free</strong><span>Before recommending anything, you get full Premium access on us — so what you tell your audience is something you've actually used, not just read about.</span></div></li>
+            <li class="reveal-item"><span class="mark">✓</span><div><strong>Your name, your call</strong><span>Post it however and wherever fits you — a bio link, a story, a single mention. There's no script to follow and no schedule to keep.</span></div></li>
           </ul>
         </section>
 
-        <section class="block">
+        <section class="block reveal">
           <div class="kicker">Your dashboard</div>
           <h2>Everything you need to track it, in one private page.</h2>
           <p>No login, no app to install — just your own link, bookmarked once. It updates in real time as clicks turn into signups turn into earnings.</p>
           <div class="panel-frame">
             <div class="panel-label"><span class="tag">Illustrative example</span></div>
-            <div class="panel">
+            <div class="panel tilt">
               <div class="panel-row"><span>aura-guidance.netlify.app/?ref=your-name</span><span class="copy">COPY</span></div>
               <div class="panel-stats">
-                <div class="stat-card"><div class="v">248</div><div class="l">Clicks</div></div>
-                <div class="stat-card"><div class="v">31</div><div class="l">Signups</div></div>
-                <div class="stat-card"><div class="v">12%</div><div class="l">Conversion</div></div>
+                <div class="stat-card"><div class="v"><span class="counter" data-target="248">0</span></div><div class="l">Clicks</div></div>
+                <div class="stat-card"><div class="v"><span class="counter" data-target="31">0</span></div><div class="l">Signups</div></div>
+                <div class="stat-card"><div class="v"><span class="counter" data-target="12">0</span>%</div><div class="l">Conversion</div></div>
               </div>
               <div class="owed-card">
-                <div><div class="l">Available to withdraw</div><div class="v">$186.30</div></div>
+                <div><div class="l">Available to withdraw</div><div class="v">$<span class="counter" data-target="186" data-decimals="2" data-decimal-target="30">0</span></div></div>
                 <button type="button">Request payout</button>
               </div>
             </div>
@@ -499,28 +535,155 @@
           </div>
         </section>
 
-        <section class="block">
+        <section class="block reveal">
           <div class="kicker">Getting paid</div>
           <h2>Simple, honest, manual — on purpose.</h2>
           <p>There's no automatic bank transfer, and we'd rather tell you that upfront than overpromise. When you request a payout from your dashboard, it's reviewed and sent by hand within a few days — so every payment is a real person confirming a real transfer, not a black box.</p>
           <div class="mech-list">
-            <div><span><strong>Request anytime</strong> — from your dashboard, whenever your available balance is worth withdrawing.</span></div>
-            <div><span><strong>Paid within 3 business days</strong> — via Wise, bank transfer, or Pix, whichever works for where you are.</span></div>
-            <div><span><strong>Full history kept</strong> — every payout you've requested and received stays visible on your dashboard.</span></div>
+            <div class="reveal-item"><span><strong>Request anytime</strong> — from your dashboard, whenever your available balance is worth withdrawing.</span></div>
+            <div class="reveal-item"><span><strong>Paid within 3 business days</strong> — via Wise, bank transfer, or Pix, whichever works for where you are.</span></div>
+            <div class="reveal-item"><span><strong>Full history kept</strong> — every payout you've requested and received stays visible on your dashboard.</span></div>
           </div>
         </section>
 
       </div>
 
-      <div class="closing">
+      <div class="closing reveal">
         <h2>Ready to start?</h2>
         <p>Reach out to whoever sent you this to receive your personal invite — your link and dashboard are both already inside it, ready within minutes.</p>
-        <span class="cta">Let's talk</span>
+        <button type="button" class="cta" id="closingCta">
+          <span class="cta-label">Let's talk</span>
+        </button>
         <p class="footnote">Aura AI Partner Program · Private invitation, not a public offer</p>
       </div>
 
       <footer class="pagefoot">Aura AI</footer>
 
     </div>
+
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <script>
+      // Inline scripts ignore the `defer` attribute entirely (it only affects
+      // scripts with a `src`) — without this listener, this would run
+      // immediately, before the two deferred GSAP files above have executed,
+      // and every ScrollTrigger call below would silently no-op forever.
+      document.addEventListener("DOMContentLoaded", function () {
+        // ---------- closing CTA: always gives visible feedback, never a dead click ----------
+        // window.close() only works on tabs opened by script — a normal navigated tab (the
+        // real-world case here, opened from a shared DM link) can't be closed this way by
+        // any browser's security model. So the click always plays a confirmation first;
+        // the close attempt is a silent bonus for the rare contexts where it's allowed.
+        var ctaBtn = document.getElementById("closingCta");
+        if (ctaBtn) {
+          ctaBtn.addEventListener("click", function () {
+            if (ctaBtn.classList.contains("confirmed")) return;
+            ctaBtn.classList.add("confirmed");
+            ctaBtn.innerHTML =
+              '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg><span class="cta-label">See you on TikTok</span>';
+            setTimeout(function () {
+              try { window.close(); } catch (e) {}
+            }, 900);
+          });
+        }
+
+        // ---------- everything below is progressive enhancement ----------
+        // All content above is already fully visible by default CSS — nothing here
+        // hides anything up front. If GSAP fails to load (blocked CDN, offline), the
+        // page simply stays static and fully readable.
+        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+        if (typeof gsap === "undefined" || !gsap.registerPlugin) return;
+
+        gsap.registerPlugin(ScrollTrigger);
+
+        // Section + item reveals — fade/rise in once, staggered for child items.
+        document.querySelectorAll(".reveal").forEach(function (section) {
+          var items = section.querySelectorAll(".reveal-item");
+          var tl = gsap.timeline({
+            scrollTrigger: { trigger: section, start: "top 82%", once: true },
+          });
+          tl.from(section.querySelectorAll(":scope > .kicker, :scope > h2, :scope > p.lead, :scope > h2 + p, :scope > p"), {
+            opacity: 0, y: 26, duration: 0.7, ease: "power2.out", stagger: 0.08,
+          });
+          if (items.length) {
+            tl.from(items, { opacity: 0, y: 20, duration: 0.6, ease: "power2.out", stagger: 0.1 }, "-=0.35");
+          }
+          var offer = section.querySelector(".offer");
+          if (offer) tl.from(offer, { opacity: 0, y: 30, scale: 0.97, duration: 0.7, ease: "power2.out" }, "-=0.3");
+          var panelFrame = section.querySelector(".panel-frame");
+          if (panelFrame) tl.from(panelFrame, { opacity: 0, y: 30, duration: 0.7, ease: "power2.out" }, "-=0.3");
+        });
+
+        // Constellation thread draws downward in sync with reading progress through the column.
+        var column = document.querySelector(".column");
+        var threadFill = document.querySelector(".thread-fill");
+        if (column && threadFill) {
+          gsap.to(threadFill, {
+            scaleY: 1,
+            ease: "none",
+            scrollTrigger: { trigger: column, start: "top 75%", end: "bottom 60%", scrub: 0.6 },
+          });
+        }
+
+        // Hero glow: subtle parallax depth as the page scrolls past it.
+        var glow = document.querySelector(".aura-glow");
+        if (glow) {
+          gsap.to(glow, {
+            y: 60,
+            scale: 1.08,
+            ease: "none",
+            scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: 0.6 },
+          });
+        }
+
+        // Starfield depth: two layers drift at different speeds — real parallax, not decoration.
+        gsap.to(".stars-far", { y: -40, ease: "none", scrollTrigger: { trigger: document.body, start: "top top", end: "bottom bottom", scrub: 0.8 } });
+        gsap.to(".stars-near", { y: -100, ease: "none", scrollTrigger: { trigger: document.body, start: "top top", end: "bottom bottom", scrub: 0.8 } });
+
+        // Number counters: count up once when their card enters view.
+        document.querySelectorAll(".counter").forEach(function (el) {
+          var target = parseFloat(el.getAttribute("data-target")) || 0;
+          var decimalTarget = el.getAttribute("data-decimal-target");
+          var proxy = { v: 0, d: 0 };
+          ScrollTrigger.create({
+            trigger: el, start: "top 88%", once: true,
+            onEnter: function () {
+              var tl = gsap.timeline();
+              tl.to(proxy, {
+                v: target, duration: 1.3, ease: "power2.out",
+                onUpdate: function () {
+                  el.textContent = decimalTarget ? Math.round(proxy.v) : Math.round(proxy.v);
+                },
+              }, 0);
+              if (decimalTarget) {
+                tl.to(proxy, {
+                  d: parseFloat(decimalTarget), duration: 1.3, ease: "power2.out",
+                  onUpdate: function () {
+                    el.textContent = Math.round(proxy.v) + "." + String(Math.round(proxy.d)).padStart(2, "0");
+                  },
+                }, 0);
+              }
+            },
+          });
+        });
+
+        // 3D tilt on the dashboard mock + commission card — pointer devices only.
+        if (window.matchMedia("(pointer: fine)").matches) {
+          document.querySelectorAll(".tilt").forEach(function (card) {
+            var bounds;
+            card.addEventListener("mouseenter", function () { bounds = card.getBoundingClientRect(); });
+            card.addEventListener("mousemove", function (e) {
+              if (!bounds) bounds = card.getBoundingClientRect();
+              var px = (e.clientX - bounds.left) / bounds.width - 0.5;
+              var py = (e.clientY - bounds.top) / bounds.height - 0.5;
+              gsap.to(card, { rotateY: px * 10, rotateX: py * -10, transformPerspective: 900, duration: 0.5, ease: "power2.out" });
+            });
+            card.addEventListener("mouseleave", function () {
+              gsap.to(card, { rotateY: 0, rotateX: 0, duration: 0.6, ease: "power3.out" });
+            });
+          });
+        }
+      });
+    </script>
   </body>
 </html>
