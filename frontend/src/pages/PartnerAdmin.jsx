@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronLeft, Copy, Check, Pause, Play, RefreshCw, Trash2, Users, MousePointerClick, Wallet, Loader2, Sparkles } from "lucide-react";
+import { ChevronLeft, Copy, Check, Pause, Play, RefreshCw, Trash2, Users, MousePointerClick, Wallet, Loader2, Sparkles, Gem } from "lucide-react";
 import api from "../api";
 import { useAuth } from "../store";
 import { referralLink } from "../partnerConfig";
@@ -67,6 +67,8 @@ export default function PartnerAdmin() {
   const [error, setError] = useState("");
   const [busyId, setBusyId] = useState(null);
   const [regenerated, setRegenerated] = useState({});
+  const [premiumEmail, setPremiumEmail] = useState({});
+  const [premiumMsg, setPremiumMsg] = useState({});
   const [lastSync, setLastSync] = useState(null);
   const syncAgo = useAgo(lastSync);
 
@@ -140,6 +142,22 @@ export default function PartnerAdmin() {
       const { data } = await api.post(`/admin/partners/${p.id}/regenerate-link`);
       setRegenerated((r) => ({ ...r, [p.id]: data.dashboard_token }));
     } finally { setBusyId(null); }
+  };
+
+  const grantPremium = async (p) => {
+    const email = (premiumEmail[p.id] || "").trim();
+    if (!email) return;
+    setBusyId(p.id);
+    setPremiumMsg((m) => ({ ...m, [p.id]: "" }));
+    try {
+      await api.post(`/admin/partners/${p.id}/grant-premium`, { email });
+      setPremiumMsg((m) => ({ ...m, [p.id]: `Premium liberado para ${email}.` }));
+      setPremiumEmail((m) => ({ ...m, [p.id]: "" }));
+    } catch (e) {
+      setPremiumMsg((m) => ({ ...m, [p.id]: e?.response?.data?.detail || "Não encontrei essa conta no app — ela precisa ter se cadastrado primeiro." }));
+    } finally {
+      setBusyId(null);
+    }
   };
 
   const markPaid = async (id) => {
@@ -289,6 +307,21 @@ export default function PartnerAdmin() {
                 <details className="mt-2 text-white/30 text-[11px]">
                   <summary className="cursor-pointer">Link de divulgação (referência)</summary>
                   <div className="mt-1.5"><CopyField value={referralLink(p.code)} /></div>
+                </details>
+
+                <details className="mt-2 text-white/30 text-[11px]">
+                  <summary className="cursor-pointer flex items-center gap-1.5 w-fit"><Gem size={11} /> Dar Premium grátis (pra ela(e) testar o app)</summary>
+                  <div className="mt-2 flex gap-2">
+                    <input placeholder="e-mail da conta dela(e) no app" value={premiumEmail[p.id] || ""}
+                      onChange={(e) => setPremiumEmail((m) => ({ ...m, [p.id]: e.target.value }))}
+                      className="flex-1 bg-white/5 border border-white/10 rounded-lg px-2.5 py-2 text-xs outline-none focus:border-[#e7c46a]/50" />
+                    <button onClick={() => grantPremium(p)} disabled={busyId === p.id || !premiumEmail[p.id]}
+                      className="shrink-0 bg-[#e7c46a]/15 text-[#e7c46a] border border-[#e7c46a]/30 rounded-lg px-3 text-xs font-bold disabled:opacity-40">
+                      Liberar
+                    </button>
+                  </div>
+                  {premiumMsg[p.id] && <p className="text-white/40 mt-1.5">{premiumMsg[p.id]}</p>}
+                  <p className="text-white/25 mt-1.5 leading-relaxed">A pessoa precisa já ter feito login no app (com Google ou e-mail) pra essa conta existir. Isso não gera comissão nem custa nada — é só liberar o acesso.</p>
                 </details>
               </div>
             ))}

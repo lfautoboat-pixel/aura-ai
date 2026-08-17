@@ -1281,6 +1281,30 @@ async def delete_partner(partner_id: str, admin=Depends(require_admin)):
     return {"deleted": True}
 
 
+class GrantPremiumBody(BaseModel):
+    email: str
+
+
+@api.post("/admin/partners/{partner_id}/grant-premium")
+async def grant_partner_premium(partner_id: str, body: GrantPremiumBody, admin=Depends(require_admin)):
+    """Lets a partner genuinely use the product before promoting it — a real
+    account they can open the app with, not a promise. Marked
+    premium_source: complimentary so it's distinguishable from a paid
+    subscription (no stripe_subscription_id, so it's simply never touched by
+    the renewal/cancellation webhook logic — it just doesn't expire)."""
+    partner = await db.partners.find_one({"id": partner_id}, {"_id": 0})
+    if not partner:
+        raise HTTPException(404, "Partner not found")
+    email = body.email.strip().lower()
+    result = await db.users.update_one(
+        {"email": email},
+        {"$set": {"premium": True, "premium_source": "complimentary"}},
+    )
+    if result.matched_count == 0:
+        raise HTTPException(404, "No Aura AI account found with that e-mail yet — they need to sign up in the app first.")
+    return {"granted": True, "email": email}
+
+
 @api.post("/admin/partners/{partner_id}/regenerate-link")
 async def regenerate_partner_link(partner_id: str, admin=Depends(require_admin)):
     """Safety net for a solo non-technical operator: the dashboard_token is
