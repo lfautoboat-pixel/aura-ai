@@ -5,6 +5,7 @@ import { GoogleLogin } from "@react-oauth/google";
 import { useFunnel, STEPS } from "@/state/FunnelContext";
 import { useAuth } from "@/store";
 import { useI18n } from "@/i18n";
+import { isSupportedNebulaLanguage } from "@/nebula-i18n";
 import { getReferral } from "@/referral";
 import { startCheckout, ExpressCheckout } from "@/components/Monetize";
 import api from "@/api";
@@ -27,7 +28,11 @@ function savePendingReading({ image, answers, readingId, language }) {
 export function CheckoutModal() {
   const { t, step, setStep, selectedPlan, image, answers, readingId, language } = useFunnel();
   const { user, login } = useAuth();
-  const { currency } = useI18n();
+  const { currency: regionCurrency } = useI18n();
+  // Keeps the price shown here consistent with whatever language actually
+  // rendered — see the matching comment in Paywall.jsx for why this can't
+  // just be the shared region-based currency.
+  const currency = isSupportedNebulaLanguage() ? regionCurrency : "usd";
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
   const [devCode, setDevCode] = useState("");
@@ -130,7 +135,11 @@ export function CheckoutModal() {
                   <div className="checkout-auth" data-testid="checkout-auth-choose">
                     {googleConfigured ? (
                       <div data-testid="checkout-google-btn" style={{ display: "flex", justifyContent: "center" }}>
-                        <GoogleLogin onSuccess={onGoogleSuccess} onError={() => setErrorMsg(t.checkout.authError)} width="300" shape="pill" text="continue_with" />
+                        {/* Google's own widget renders its label from the browser's locale by
+                            default, ignoring whatever language the surrounding page picked —
+                            explicitly pinning it to `language` (already Nebula's resolved,
+                            already-English-if-unsupported value) keeps the two in sync. */}
+                        <GoogleLogin onSuccess={onGoogleSuccess} onError={() => setErrorMsg(t.checkout.authError)} width="300" shape="pill" text="continue_with" locale={language} />
                       </div>
                     ) : null}
                     <div className="checkout-field">

@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Check, Lock, ShieldCheck, Sparkles, Star } from "lucide-react";
 import { useFunnel, STEPS } from "@/state/FunnelContext";
 import { useI18n } from "@/i18n";
+import { isSupportedNebulaLanguage } from "@/nebula-i18n";
 import { planIds } from "@/data/plans";
 import api from "@/api";
 
@@ -10,7 +11,14 @@ const INITIAL_SECONDS = 9 * 60 + 59;
 
 export function Paywall() {
   const { t, image, setStep, selectedPlan, setSelectedPlan } = useFunnel();
-  const { currency, money } = useI18n();
+  const { currency: regionCurrency, money } = useI18n();
+  // The shared currency detector goes off browser region alone — a visitor
+  // whose language isn't one Nebula actually supports already sees English
+  // copy (nebula-i18n's fallback), so pricing has to fall back to USD with
+  // it. Otherwise a Portuguese-region visitor gets English text next to a
+  // Brazilian Real price, which is confusing at the exact moment someone
+  // needs to trust the number they're about to pay.
+  const currency = isSupportedNebulaLanguage() ? regionCurrency : "usd";
   const planId = selectedPlan;
   const setPlanId = setSelectedPlan;
   const [seconds, setSeconds] = useState(INITIAL_SECONDS);

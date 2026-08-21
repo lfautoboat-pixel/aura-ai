@@ -255,7 +255,10 @@ export default function Funnel() {
               <p className="text-[#6a5f8c]">{t("profile_sub")}</p>
               {googleConfigured ? (
                 <div data-testid="google-btn" className="w-full [&>div]:!w-full flex justify-center rounded-2xl overflow-hidden">
-                  <GoogleLogin onSuccess={onGoogleSuccess} onError={() => {}} width="320" shape="pill" text="continue_with" />
+                  {/* Pin to the app's own resolved language, not the browser's raw locale —
+                      otherwise this can drift from the rest of the page (e.g. after a manual
+                      language switch, or a ?lang= override). */}
+                  <GoogleLogin onSuccess={onGoogleSuccess} onError={() => {}} width="320" shape="pill" text="continue_with" locale={lang} />
                 </div>
               ) : (
                 <button data-testid="google-btn" disabled title="Login com Google em configuração"
