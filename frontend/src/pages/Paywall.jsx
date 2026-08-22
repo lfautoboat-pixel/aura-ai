@@ -100,7 +100,7 @@ export default function Paywall() {
             <div key={f} className="flex items-center gap-2 text-sm text-white/80"><Check size={16} className="text-emerald-400" /> {f}</div>
           ))}
         </div>
-        <p className="text-center text-white/30 text-[11px] mt-4">Secured by Stripe · Cancel anytime · Test card 4242 4242 4242 4242</p>
+        <p className="text-center text-white/30 text-[11px] mt-4">Secured by Stripe · Cancel anytime</p>
       </div>
     </div>
   );

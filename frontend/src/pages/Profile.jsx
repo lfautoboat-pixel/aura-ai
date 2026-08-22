@@ -69,13 +69,18 @@ function useNotifications() {
 export default function Profile() {
   const nav = useNavigate();
   const { t, lang, setLang, money } = useI18n();
-  const { user, logout } = useAuth();
+  const { user, loading, logout } = useAuth();
   const [history, setHistory] = useState([]);
   const push = useNotifications();
   const [testSent, setTestSent] = useState(false);
 
   useEffect(() => { api.get("/payments/history").then((r) => setHistory(r.data.purchases || [])); }, []);
-  useEffect(() => { if (!user) nav("/"); }, [user, nav]);
+  // `user` starts null while /auth/me is still in flight on a fresh load —
+  // redirecting on that alone bounces an already-logged-in visitor who
+  // landed here directly (refresh, bookmark, deep link) straight back out,
+  // through "/" and its own redirect chain, to /app/guides. Wait for the
+  // auth check to actually finish before deciding no one's logged in.
+  useEffect(() => { if (!loading && !user) nav("/"); }, [loading, user, nav]);
 
   const fmtDate = (d) => { try { return new Date(d).toLocaleDateString(); } catch { return ""; } };
 
