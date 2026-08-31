@@ -4,6 +4,7 @@ import { CheckCircle2, XCircle, Loader2 } from "lucide-react";
 import api from "../api";
 import { useAuth } from "../store";
 import { Starfield } from "../components/Cosmic";
+import { trackPurchase } from "../tiktokPixel";
 
 // Matches the routing choice in App.js: on the "legacy" entry deploy, Nebula
 // lives at /soulmate instead of /, so the post-payment redirect back into it
@@ -25,6 +26,11 @@ export function PaymentSuccess() {
       try {
         const { data } = await api.get(`/payments/status/${sid}`);
         if (data.payment_status === "paid") {
+          // Fires only here — after the backend has independently checked
+          // Stripe itself, not just because this URL was visited. A
+          // cancelled/expired session, or someone guessing a URL, never
+          // reaches this branch.
+          trackPurchase({ amount: data.amount, currency: data.currency });
           await refresh();
           // Nebula funnel checkout (see CheckoutModal.jsx) stashes the reading
           // before redirecting here — send those users back into the funnel's

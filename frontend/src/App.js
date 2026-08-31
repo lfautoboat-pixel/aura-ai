@@ -5,12 +5,16 @@ import { I18nProvider } from "@/i18n";
 import { AuthProvider } from "@/store";
 import { Toaster } from "sonner";
 import { captureReferral } from "@/referral";
+import { initTikTokPixel } from "@/tiktokPixel";
 import PartnerDashboard from "@/pages/PartnerDashboard";
 import PartnerAdmin from "@/pages/PartnerAdmin";
 
 // Runs once per page load, before anything else — a partner's link must be
 // attributed even if the visitor bounces on the very first screen.
 captureReferral();
+// No-ops on every domain except the one the ads campaign actually runs on
+// (see tiktokPixel.js) — safe to call unconditionally here.
+initTikTokPixel();
 import Funnel from "@/pages/Funnel";
 import Nebula from "@/pages/Nebula";
 import AppShell from "@/pages/AppShell";

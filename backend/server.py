@@ -1751,7 +1751,8 @@ async def payment_status(session_id: str):
         except stripe.error.StripeError:
             pass
     return {"session_id": record["session_id"], "status": record["status"],
-            "payment_status": record["payment_status"]}
+            "payment_status": record["payment_status"],
+            "amount": record.get("amount"), "currency": record.get("currency")}
 
 
 @api.get("/payments/history")
