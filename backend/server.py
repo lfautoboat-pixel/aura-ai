@@ -1371,6 +1371,18 @@ async def list_payouts(admin=Depends(require_admin)):
     return rows
 
 
+@api.get("/admin/transactions")
+async def list_transactions(admin=Depends(require_admin)):
+    """Read-only visibility into payment_transactions for diagnosing a live
+    campaign — e.g. distinguishing "nobody has reached checkout yet" from
+    "someone reached checkout, Stripe charged them, and our own fulfillment
+    silently never confirmed it" (exactly what the pre-fix Express Checkout
+    bug would have looked like from this table's point of view: a real
+    transaction stuck at payment_status="pending" forever)."""
+    rows = await db.payment_transactions.find({}, {"_id": 0}).sort("created_at", -1).to_list(200)
+    return rows
+
+
 @api.post("/admin/payouts/{payout_id}/mark-paid")
 async def mark_payout_paid(payout_id: str, admin=Depends(require_admin)):
     payout = await db.payout_requests.find_one({"id": payout_id}, {"_id": 0})
