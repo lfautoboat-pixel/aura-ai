@@ -42,7 +42,9 @@ function ExpressButtons({ itemKey, currency }) {
     try {
       const submit = await elements.submit();
       if (submit.error) return;
-      const { data } = await api.post("/payments/create-intent", { item_key: itemKey, currency });
+      const { data } = await api.post("/payments/create-intent", {
+        item_key: itemKey, currency, origin_url: window.location.origin,
+      });
       const { error } = await stripe.confirmPayment({
         elements, clientSecret: data.client_secret,
         confirmParams: { return_url: `${window.location.origin}/payment/success` },

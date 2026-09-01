@@ -1,4 +1,4 @@
-import os, uuid, random, logging, asyncio, json, base64, re, secrets
+import os, uuid, random, logging, asyncio, json, base64, re, secrets, hashlib
 from pathlib import Path
 from datetime import datetime, timezone, timedelta
 from typing import Optional, List
@@ -90,6 +90,21 @@ GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID')
 
 stripe.api_key = os.environ.get('STRIPE_SECRET_KEY') or 'sk_test_placeholder'
 STRIPE_WEBHOOK_SECRET = os.environ.get('STRIPE_WEBHOOK_SECRET', '')
+
+# --- TikTok Events API (server-side): a second, more reliable way to report
+# a purchase than the browser Pixel alone — it survives ad blockers, Safari's
+# ITP, and a visitor closing the tab before the client-side call fires. Kept
+# optional (empty token = silently skipped) so a missing/rotated token never
+# breaks a real checkout. Scoped to the exact same ad-funnel domain as
+# tiktokPixel.js on the frontend — never fires for traffic that was never
+# part of that campaign in the first place.
+TIKTOK_ACCESS_TOKEN = os.environ.get('TIKTOK_ACCESS_TOKEN', '')
+TIKTOK_PIXEL_ID = os.environ.get('TIKTOK_PIXEL_ID', 'DAB0GC3C77UC8FLJEVRG')
+TIKTOK_ADS_HOSTNAME = os.environ.get('TIKTOK_ADS_HOSTNAME', 'app-auraai.netlify.app')
+# Set only while actively testing in TikTok Events Manager's "Test Events"
+# panel — it tags events as test traffic so they show up there instantly
+# without ever counting toward real ad optimization. Unset for real traffic.
+TIKTOK_TEST_EVENT_CODE = os.environ.get('TIKTOK_TEST_EVENT_CODE', '')
 
 # --- Transactional email: Brevo (single-sender verification, no domain
 # required) is tried first since it works without owning a domain. Resend
@@ -645,6 +660,7 @@ class CheckoutRequest(BaseModel):
 class IntentRequest(BaseModel):
     item_key: str
     currency: str = "usd"
+    origin_url: Optional[str] = None
 
 
 def make_token(uid: str) -> str:
@@ -1654,7 +1670,7 @@ async def checkout(body: CheckoutRequest, user=Depends(current_user)):
         "session_id": session.id, "user_id": user["id"], "item_key": body.item_key,
         "amount": (price.unit_amount or 0), "currency": price.currency,
         "label": _tx_label(body.item_key), "status": "initiated", "payment_status": "pending",
-        "created_at": now_iso(), "updated_at": now_iso(),
+        "origin_url": body.origin_url, "created_at": now_iso(), "updated_at": now_iso(),
     })
     return {"checkout_url": session.url, "session_id": session.id}
 
@@ -1683,7 +1699,7 @@ async def create_intent(body: IntentRequest, user=Depends(current_user)):
         "session_id": intent.id, "user_id": user["id"], "item_key": body.item_key,
         "amount": price.unit_amount, "currency": price.currency,
         "label": _tx_label(body.item_key), "status": "initiated", "payment_status": "pending",
-        "created_at": now_iso(), "updated_at": now_iso(),
+        "origin_url": body.origin_url, "created_at": now_iso(), "updated_at": now_iso(),
     })
     return {"client_secret": intent.client_secret, "intent_id": intent.id}
 
@@ -1730,6 +1746,45 @@ async def _credit_partner_commission(user: dict, amount: int, currency: str, sou
     )
 
 
+async def _report_tiktok_purchase(user: dict, origin_url: str, amount: int, currency: str, event_id: str):
+    """Best-effort only: a TikTok API hiccup must never fail a real purchase
+    that already succeeded. Runs after the sale is already fulfilled, from
+    both the webhook and the status-poll fallback (whichever gets there
+    first) — `event_id` matches the browser Pixel's own event_id so TikTok
+    dedupes the two into one conversion instead of double-counting it."""
+    if not TIKTOK_ACCESS_TOKEN or not origin_url:
+        return
+    from urllib.parse import urlparse
+    if urlparse(origin_url).hostname != TIKTOK_ADS_HOSTNAME:
+        return
+    email = (user or {}).get("email")
+    hashed_email = hashlib.sha256(email.strip().lower().encode()).hexdigest() if email else None
+    payload = {
+        "event_source": "web",
+        "event_source_id": TIKTOK_PIXEL_ID,
+        "data": [{
+            "event": "CompletePayment",
+            "event_time": int(datetime.now(timezone.utc).timestamp()),
+            "event_id": event_id,
+            "user": {"email": [hashed_email]} if hashed_email else {},
+            "properties": {"value": amount / 100, "currency": currency.upper()},
+            "page": {"url": origin_url},
+        }],
+    }
+    if TIKTOK_TEST_EVENT_CODE:
+        payload["test_event_code"] = TIKTOK_TEST_EVENT_CODE
+    try:
+        async with httpx.AsyncClient(timeout=10) as client_:
+            r = await client_.post(
+                "https://business-api.tiktok.com/open_api/v1.3/event/track/",
+                headers={"Access-Token": TIKTOK_ACCESS_TOKEN, "Content-Type": "application/json"},
+                json=payload)
+            if r.status_code >= 300:
+                logger.error(f"TikTok CAPI error {r.status_code}: {r.text}")
+    except Exception as e:
+        logger.error(f"TikTok CAPI request failed: {e}")
+
+
 async def _fulfill(record):
     if not record or record.get("fulfilled"):
         return
@@ -1743,6 +1798,8 @@ async def _fulfill(record):
     await db.payment_transactions.update_one({"session_id": record["session_id"]}, {"$set": {"fulfilled": True}})
     user = await db.users.find_one({"id": record["user_id"]}, {"_id": 0})
     await _credit_partner_commission(user, record.get("amount", 0), record.get("currency", "usd"), "initial")
+    await _report_tiktok_purchase(user, record.get("origin_url"), record.get("amount", 0),
+                                   record.get("currency", "usd"), record["session_id"])
 
 
 @api.get("/payments/status/{session_id}")

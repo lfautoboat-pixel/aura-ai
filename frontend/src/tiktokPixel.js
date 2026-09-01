@@ -54,10 +54,15 @@ export function initTikTokPixel() {
 // Call only once the backend has independently confirmed payment_status ===
 // "paid" (see PaymentResult.jsx) — never on page load alone, so a cancelled
 // or expired session can't register as a sale.
-export function trackPurchase({ amount, currency }) {
+//
+// eventId should be the Stripe session/intent id — the backend's own
+// server-side report of this same purchase (_report_tiktok_purchase in
+// server.py) uses that exact id too, so TikTok dedupes the browser and
+// server events into one conversion instead of double-counting the sale.
+export function trackPurchase({ amount, currency, eventId }) {
   if (!isAdsHost() || !window.ttq) return;
   const payload = {};
   if (typeof amount === "number") payload.value = amount / 100;
   if (currency) payload.currency = currency.toUpperCase();
-  window.ttq.track("CompletePayment", payload);
+  window.ttq.track("CompletePayment", payload, eventId ? { event_id: eventId } : undefined);
 }

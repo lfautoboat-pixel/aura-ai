@@ -16,7 +16,14 @@ export function PaymentSuccess() {
   const nav = useNavigate();
   const { refresh } = useAuth();
   const [status, setStatus] = useState("checking");
-  const sid = params.get("session_id");
+  // Checkout Session redirects (startCheckout) carry ?session_id=cs_...
+  // Express Checkout (Apple Pay/Google Pay/Link, see Monetize.jsx) instead
+  // goes through stripe.confirmPayment(), which appends its OWN param —
+  // ?payment_intent=pi_... — to the same return_url. Missing this fallback
+  // meant a real, successfully charged Express Checkout payment landed on
+  // the "we couldn't confirm this payment" error screen every time. The
+  // backend's /payments/status/{id} already accepts either id shape.
+  const sid = params.get("session_id") || params.get("payment_intent");
 
   useEffect(() => {
     if (!sid) { setStatus("error"); return; }
@@ -30,7 +37,7 @@ export function PaymentSuccess() {
           // Stripe itself, not just because this URL was visited. A
           // cancelled/expired session, or someone guessing a URL, never
           // reaches this branch.
-          trackPurchase({ amount: data.amount, currency: data.currency });
+          trackPurchase({ amount: data.amount, currency: data.currency, eventId: sid });
           await refresh();
           // Nebula funnel checkout (see CheckoutModal.jsx) stashes the reading
           // before redirecting here — send those users back into the funnel's
