@@ -72,6 +72,9 @@ function AppRouter() {
           credential, exactly like the betting-affiliate panel the partner
           program was modeled on (see studio memory). */}
       <Route path="/partner/:token" element={<PartnerDashboard />} />
+      {/* Any unmatched URL (typo, stale bookmark, broken ad link) must never
+          render a blank screen — send visitors back to the funnel entry. */}
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }

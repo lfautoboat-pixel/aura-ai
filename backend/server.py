@@ -969,8 +969,15 @@ async def _llm_reply(system: str, prompt: str, fallback: str, max_tokens: Option
 
     for index, client in _llm_pool.iter_clients():
         try:
-            resp = await asyncio.to_thread(
-                client.models.generate_content, model=AURA_LLM_MODEL, contents=prompt, config=config)
+            # The SDK's HTTP call has no timeout of its own — a stalled network
+            # path to Google (seen for real once already) previously hung this
+            # request, and therefore the seeker's entire chat screen, forever.
+            # A bounded wait always leaves time to fall back to `fallback`
+            # instead of leaving the "typing…" indicator spinning indefinitely.
+            resp = await asyncio.wait_for(
+                asyncio.to_thread(
+                    client.models.generate_content, model=AURA_LLM_MODEL, contents=prompt, config=config),
+                timeout=25)
             text = (resp.text or "").strip()
             if not text:
                 return fallback, True

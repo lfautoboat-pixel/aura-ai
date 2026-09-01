@@ -72,11 +72,17 @@ export default function Chat() {
   const recognitionRef = useRef(null);
 
   useEffect(() => {
-    api.get(`/content/advisors?lang=${lang}`).then((r) => setAdvisor(r.data.find((a) => a.id === id)));
+    api.get(`/content/advisors?lang=${lang}`).then((r) => {
+      const found = r.data.find((a) => a.id === id);
+      // An unknown/stale advisor id must never leave the header stuck on its
+      // "…" loading placeholder forever — bounce back to the advisor list.
+      if (!found) { nav("/app/guides", { replace: true }); return; }
+      setAdvisor(found);
+    });
     api.get(`/chat/${id}?lang=${lang}`).then((r) => setMsgs(r.data.messages || []));
     const timer = setTimeout(() => setConnecting(false), 1800);
     return () => clearTimeout(timer);
-  }, [id, lang]);
+  }, [id, lang, nav]);
 
   // Chrome loads the voice list asynchronously — reading getVoices() once on
   // mount often returns an empty array, which is why TTS silently fell back
