@@ -1391,6 +1391,35 @@ async def list_transactions(admin=Depends(require_admin)):
     return rows
 
 
+@api.get("/admin/transactions/{session_id}/stripe-detail")
+async def transaction_stripe_detail(session_id: str, admin=Depends(require_admin)):
+    """Digs past our own payment_status="pending" into what Stripe itself
+    saw on its hosted checkout page — session.status tells us whether the
+    visitor ever opened a payment form at all (open/expired) or finished
+    one (complete), and the expanded payment_intent's last_payment_error
+    is the actual decline reason when a real card was tried and refused.
+    We have zero visibility into that page ourselves once redirected —
+    this is the only way to find out why a real attempt didn't convert
+    instead of guessing."""
+    try:
+        s = stripe.checkout.Session.retrieve(session_id, expand=["payment_intent"])
+    except stripe.error.StripeError as e:
+        raise HTTPException(400, str(e))
+    pi = s.payment_intent
+    last_error = None
+    if pi and getattr(pi, "last_payment_error", None):
+        err = pi.last_payment_error
+        last_error = {"code": err.get("code"), "decline_code": err.get("decline_code"), "message": err.get("message")}
+    return {
+        "session_status": s.status,
+        "payment_status": s.payment_status,
+        "payment_intent_status": pi.status if pi else None,
+        "last_payment_error": last_error,
+        "customer_email": (s.customer_details or {}).get("email") if s.customer_details else None,
+        "expires_at": s.expires_at,
+    }
+
+
 @api.post("/admin/payouts/{payout_id}/mark-paid")
 async def mark_payout_paid(payout_id: str, admin=Depends(require_admin)):
     payout = await db.payout_requests.find_one({"id": payout_id}, {"_id": 0})
