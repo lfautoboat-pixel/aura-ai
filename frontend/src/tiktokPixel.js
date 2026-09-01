@@ -73,8 +73,15 @@ function contentProps(planId, amount, currency) {
 // server-side report of this same purchase (_report_tiktok_purchase in
 // server.py) uses that exact id too, so TikTok dedupes the browser and
 // server events into one conversion instead of double-counting the sale.
-export function trackPurchase({ amount, currency, eventId, planId }) {
+export function trackPurchase({ amount, currency, eventId, planId, email }) {
   if (!isAdsHost() || !window.ttq) return;
+  // TikTok flagged "email and phone are missing" specifically on Purchase —
+  // the earlier funnel events (ViewContent/AddToCart/InitiateCheckout) fire
+  // before signup even happens, so there's structurally no email yet at
+  // that point. By the time Purchase fires the user has signed up, so this
+  // is the one call that actually can carry it. ttq.identify hashes email
+  // itself — never hash it here.
+  if (email && window.ttq.identify) window.ttq.identify({ email });
   window.ttq.track("CompletePayment", contentProps(planId, amount, currency), eventId ? { event_id: eventId } : undefined);
 }
 

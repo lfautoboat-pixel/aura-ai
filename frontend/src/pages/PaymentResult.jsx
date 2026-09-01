@@ -14,7 +14,7 @@ const NEBULA_PATH = (process.env.REACT_APP_ENTRY_FUNNEL || "nebula") === "legacy
 export function PaymentSuccess() {
   const [params] = useSearchParams();
   const nav = useNavigate();
-  const { refresh } = useAuth();
+  const { user, refresh } = useAuth();
   const [status, setStatus] = useState("checking");
   // Checkout Session redirects (startCheckout) carry ?session_id=cs_...
   // Express Checkout (Apple Pay/Google Pay/Link, see Monetize.jsx) instead
@@ -37,7 +37,7 @@ export function PaymentSuccess() {
           // Stripe itself, not just because this URL was visited. A
           // cancelled/expired session, or someone guessing a URL, never
           // reaches this branch.
-          trackPurchase({ amount: data.amount, currency: data.currency, eventId: sid, planId: data.item_key });
+          trackPurchase({ amount: data.amount, currency: data.currency, eventId: sid, planId: data.item_key, email: user?.email });
           await refresh();
           // Nebula funnel checkout (see CheckoutModal.jsx) stashes the reading
           // before redirecting here — send those users back into the funnel's
