@@ -1378,8 +1378,16 @@ async def list_transactions(admin=Depends(require_admin)):
     "someone reached checkout, Stripe charged them, and our own fulfillment
     silently never confirmed it" (exactly what the pre-fix Express Checkout
     bug would have looked like from this table's point of view: a real
-    transaction stuck at payment_status="pending" forever)."""
+    transaction stuck at payment_status="pending" forever). Each row is
+    enriched with the account's own email — first-party data we already
+    collected at signup, the same list this doubles as for remarketing
+    anyone who reached checkout but never completed."""
     rows = await db.payment_transactions.find({}, {"_id": 0}).sort("created_at", -1).to_list(200)
+    user_ids = list({r["user_id"] for r in rows if r.get("user_id")})
+    users = await db.users.find({"id": {"$in": user_ids}}, {"_id": 0, "id": 1, "email": 1}).to_list(len(user_ids))
+    email_by_id = {u["id"]: u.get("email") for u in users}
+    for r in rows:
+        r["email"] = email_by_id.get(r.get("user_id"))
     return rows
 
 
