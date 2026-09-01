@@ -93,7 +93,7 @@ function GuidesView({ advisors }) {
                   <ChevronRight size={16} />
                 </motion.span>
               </button>
-              <button onClick={() => nav(`/app/chat/${a.id}`)} className="grad-btn text-white text-xs font-bold px-3 py-2.5 rounded-xl whitespace-nowrap shrink-0" data-testid={`chat-btn-${a.id}`}>{t("start_chat")}</button>
+              <button onClick={() => nav(`/app/chat/${a.id}`)} className="grad-btn text-white text-xs font-bold px-3 py-2.5 rounded-xl whitespace-nowrap shrink-0" data-testid={`chat-btn-${a.id}`}>{t("chat_cta_short")}</button>
             </div>
           </motion.div>
         ))}

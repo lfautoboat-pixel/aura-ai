@@ -57,7 +57,7 @@ export default function Chat() {
   const { id } = useParams();
   const nav = useNavigate();
   const { t, lang } = useI18n();
-  const { user, setUser } = useAuth();
+  const { user, loading: authLoading, setUser } = useAuth();
   const [advisor, setAdvisor] = useState(null);
   const [msgs, setMsgs] = useState([]);
   const [input, setInput] = useState("");
@@ -72,6 +72,18 @@ export default function Chat() {
   const recognitionRef = useRef(null);
 
   useEffect(() => {
+    // Every "Start chat" entry point (guides list, advisor profile, funnel)
+    // links straight here with no login gate of its own — a visitor who
+    // hasn't signed up yet reaches a chat screen that LOOKS ready (advisor
+    // greeting, an enabled input) but silently drops every message: the
+    // backend correctly 401s, and the only catch here was written for 402.
+    // Bounce to the funnel entry, where signing up is actually on offer,
+    // instead of a chat that can never send anything.
+    if (!authLoading && !user) nav("/", { replace: true });
+  }, [authLoading, user, nav]);
+
+  useEffect(() => {
+    if (!user) return;
     api.get(`/content/advisors?lang=${lang}`).then((r) => {
       const found = r.data.find((a) => a.id === id);
       // An unknown/stale advisor id must never leave the header stuck on its
@@ -82,7 +94,7 @@ export default function Chat() {
     api.get(`/chat/${id}?lang=${lang}`).then((r) => setMsgs(r.data.messages || []));
     const timer = setTimeout(() => setConnecting(false), 1800);
     return () => clearTimeout(timer);
-  }, [id, lang, nav]);
+  }, [id, lang, nav, user]);
 
   // Chrome loads the voice list asynchronously — reading getVoices() once on
   // mount often returns an empty array, which is why TTS silently fell back

@@ -33,6 +33,11 @@ const en = {
   advisors_title: "Choose your guide",
   advisors_sub: "Hand-picked spiritual advisors, available around the clock.",
   start_chat: "Start free chat",
+  // Compact list-card CTA only (AppShell/Funnel advisor rows) — the full
+  // "Start free chat" was pushing 2-word advisor names into mid-word
+  // truncation on a 375px screen; the dedicated profile page has room to
+  // keep the longer, more persuasive label.
+  chat_cta_short: "Chat",
   reviews: "reviews", years_exp: "yrs",
   online: "Online", busy: "Busy", offline: "Offline",
   nav_chats: "Chats", nav_discover: "Discover", nav_guides: "Guides", nav_readings: "Readings", nav_rewards: "Rewards",
@@ -143,6 +148,7 @@ const pt = {
   advisors_title: "Escolha seu guia",
   advisors_sub: "Conselheiros espirituais selecionados, disponíveis a qualquer hora.",
   start_chat: "Iniciar chat grátis",
+  chat_cta_short: "Chat",
   reviews: "avaliações", years_exp: "anos",
   online: "Online", busy: "Ocupado", offline: "Offline",
   nav_chats: "Chats", nav_discover: "Descobrir", nav_guides: "Videntes", nav_readings: "Leituras", nav_rewards: "Recompensas",
@@ -252,6 +258,7 @@ const es = {
   advisors_title: "Elige tu guía",
   advisors_sub: "Consejeros espirituales seleccionados, disponibles a toda hora.",
   start_chat: "Iniciar chat gratis",
+  chat_cta_short: "Chat",
   reviews: "reseñas", years_exp: "años",
   online: "En línea", busy: "Ocupado", offline: "Sin conexión",
   nav_chats: "Chats", nav_discover: "Descubrir", nav_guides: "Guías", nav_readings: "Lecturas", nav_rewards: "Recompensas",

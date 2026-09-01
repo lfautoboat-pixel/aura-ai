@@ -308,7 +308,7 @@ export default function Funnel() {
                       <div className="text-xs text-[#6a5f8c] truncate">{a.title}</div>
                       <div className="text-xs text-[#7c5cff] mt-0.5">★ {a.rating} · {a.reviews} {t("reviews")}</div>
                     </div>
-                    <button onClick={() => nav(`/app/chat/${a.id}`)} className="grad-btn text-white text-xs font-bold px-3 py-2 rounded-xl whitespace-nowrap">{t("start_chat")}</button>
+                    <button onClick={() => nav(`/app/chat/${a.id}`)} className="grad-btn text-white text-xs font-bold px-3 py-2 rounded-xl whitespace-nowrap">{t("chat_cta_short")}</button>
                   </div>
                 ))}
               </div>
