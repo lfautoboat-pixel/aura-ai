@@ -8,6 +8,7 @@ import { useI18n } from "@/i18n";
 import { isSupportedNebulaLanguage } from "@/nebula-i18n";
 import { getReferral } from "@/referral";
 import { startCheckout, ExpressCheckout } from "@/components/Monetize";
+import { trackInitiateCheckout } from "@/tiktokPixel";
 import api from "@/api";
 
 const GOOGLE_CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID || "";
@@ -48,6 +49,8 @@ export function CheckoutModal() {
     api.get(`/billing/packs?currency=${currency}`).then(({ data }) => {
       const plan = (data.sub_plans || []).find((p) => p.item_key === selectedPlan);
       setPlanAmount(plan?.amount ?? null);
+      // Fires once, right as the modal opens — still free, no payment yet.
+      trackInitiateCheckout({ planId: selectedPlan, amount: plan?.amount, currency });
     });
   }, [open, currency, selectedPlan]);
   const close = () => setStep(STEPS.paywall);

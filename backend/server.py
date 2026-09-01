@@ -594,8 +594,16 @@ CUR_SYMBOL = {"usd": "$", "brl": "R$", "eur": "€", "gbp": "£"}
 PIX_CURRENCIES = {"brl"}
 
 
+# $0 verification item only — never shown in the app's own UI, never sold to
+# a real user. Its only purpose is letting a real (if zero-value) Checkout
+# Session actually complete, so the full checkout -> webhook -> TikTok CAPI
+# pipeline can be verified end-to-end without a fake event and without
+# touching real pricing (see /admin/tiktok-test-purchase below).
+TEST_ITEMS = {"pixel_verify": {"credits": 0}}
+
+
 def catalog_item(key):
-    return PACKS.get(key) or FLASH.get(key) or SUBS.get(key)
+    return PACKS.get(key) or FLASH.get(key) or SUBS.get(key) or TEST_ITEMS.get(key)
 
 
 def lookup_key(item_key, cur):
@@ -1671,6 +1679,43 @@ async def checkout(body: CheckoutRequest, user=Depends(current_user)):
         "amount": (price.unit_amount or 0), "currency": price.currency,
         "label": _tx_label(body.item_key), "status": "initiated", "payment_status": "pending",
         "origin_url": body.origin_url, "created_at": now_iso(), "updated_at": now_iso(),
+    })
+    return {"checkout_url": session.url, "session_id": session.id}
+
+
+@api.post("/admin/tiktok-test-purchase")
+async def tiktok_test_purchase(admin=Depends(require_admin)):
+    """Verifies the real Purchase pipeline (checkout -> webhook -> TikTok
+    CAPI) without touching real pricing or moving real money: a genuine $0
+    Stripe Checkout Session, created once and reused after. Stripe skips
+    payment-method collection entirely for a $0 total, so completing it
+    needs no card and charges nothing — but it IS a real, completed
+    Checkout Session, which is what actually drives everything downstream.
+    The resulting event reaches TikTok as a real (zero-value) conversion,
+    never a fabricated one — this only exists so that real pipeline can be
+    checked before the first paying customer runs it for real."""
+    cur = "usd"
+    lk = lookup_key("pixel_verify", cur)
+    prices = stripe.Price.list(lookup_keys=[lk], active=True, limit=1).data
+    if prices:
+        price = prices[0]
+    else:
+        product = stripe.Product.create(name="Aura AI internal — Pixel verification ($0, never sold)")
+        price = stripe.Price.create(product=product.id, unit_amount=0, currency=cur, lookup_key=lk)
+
+    origin_url = f"https://{TIKTOK_ADS_HOSTNAME}"
+    session = stripe.checkout.Session.create(
+        line_items=[{"price": price.id, "quantity": 1}],
+        mode="payment",
+        success_url=f"{origin_url}/payment/success?session_id={{CHECKOUT_SESSION_ID}}",
+        cancel_url=f"{origin_url}/payment/cancel",
+        metadata={"user_id": admin["id"], "item_key": "pixel_verify", "currency": cur},
+    )
+    await db.payment_transactions.insert_one({
+        "session_id": session.id, "user_id": admin["id"], "item_key": "pixel_verify",
+        "amount": 0, "currency": cur, "label": "Pixel verification (internal)",
+        "status": "initiated", "payment_status": "pending",
+        "origin_url": origin_url, "created_at": now_iso(), "updated_at": now_iso(),
     })
     return {"checkout_url": session.url, "session_id": session.id}
 

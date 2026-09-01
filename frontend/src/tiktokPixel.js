@@ -85,3 +85,12 @@ export function trackAddToCart({ planId, amount, currency } = {}) {
   if (currency) payload.currency = currency.toUpperCase();
   window.ttq.track("AddToCart", payload);
 }
+
+// Fires when the checkout modal opens — still free, no payment yet.
+export function trackInitiateCheckout({ planId, amount, currency } = {}) {
+  if (!isAdsHost() || !window.ttq) return;
+  const payload = { content_id: planId };
+  if (typeof amount === "number") payload.value = amount / 100;
+  if (currency) payload.currency = currency.toUpperCase();
+  window.ttq.track("InitiateCheckout", payload);
+}
