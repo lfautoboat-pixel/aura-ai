@@ -10,10 +10,10 @@ import "@/components/funnel/nebula.css";
 // -> result), now this app's entry route. The previous quiz-driven funnel
 // that used to live at "/" is preserved intact at "/legacy" — see App.js.
 function Shell() {
-  const { t } = useFunnel();
+  const { t, cookiesDismissed } = useFunnel();
   const nav = useNavigate();
   return (
-    <main className="aura-shell" data-testid="soulmate-app">
+    <main className={`aura-shell${cookiesDismissed ? "" : " cookie-banner-visible"}`} data-testid="soulmate-app">
       <div className="star-field" aria-hidden="true" />
       <TopBar />
       <FunnelRouter />

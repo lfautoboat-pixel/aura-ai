@@ -11,6 +11,22 @@
 .icon-toggle:hover{background:rgba(173,139,247,.14);color:var(--violet)}
 
 .cookie-banner{position:fixed;z-index:8;left:50%;bottom:18px;transform:translateX(-50%);width:min(530px,calc(100% - 28px));padding:18px;background:#130c20f2;border:1px solid var(--line);box-shadow:0 18px 60px #000;color:var(--ink);display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+/* A first-time visitor (the ONLY audience that ever sees this banner —
+   cookiesDismissed persists forever once set) landed with the fixed
+   bottom banner sitting directly on top of the primary CTA, on ordinary
+   phone-height viewports, before any scrolling. Confirmed via
+   elementFromPoint: the banner, not the button, was receiving the tap —
+   this was silently eating every single ad click's first tap. Fixed px
+   (not vh) because the banner's own height doesn't scale with viewport
+   height either — a vh-based reduction left shorter phones (740px tall)
+   still colliding even after taller ones (812px) cleared. Shrinking the
+   decorative orbit graphic is what actually reclaims enough room; the
+   padding-top cut alone wasn't sufficient even after emptying it out.
+   Verified against both 375x812 and 360x740 with getBoundingClientRect. */
+@media(max-width:700px){
+  .cookie-banner-visible .journey{padding-top:12px}
+  .cookie-banner-visible .hero-orbit{height:110px;margin-bottom:0}
+}
 .cookie-banner p{font-size:12px;color:var(--muted);line-height:1.5;flex:1 0 100%;margin:0}
 .cookie-banner button{border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--ink);padding:10px 13px;font-size:11px;border-radius:2px}
 .cookie-banner button:last-child{background:var(--violet);color:#170c26;border-color:var(--violet)}
