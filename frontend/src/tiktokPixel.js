@@ -66,3 +66,22 @@ export function trackPurchase({ amount, currency, eventId }) {
   if (currency) payload.currency = currency.toUpperCase();
   window.ttq.track("CompletePayment", payload, eventId ? { event_id: eventId } : undefined);
 }
+
+// Fires once when the paywall/pricing screen itself is shown — free to
+// trigger just by reaching that screen, no payment involved. Lets the
+// ViewContent event go "active" in TikTok's campaign setup without needing
+// a real transaction.
+export function trackViewContent() {
+  if (!isAdsHost() || !window.ttq) return;
+  window.ttq.track("ViewContent", { content_type: "product" });
+}
+
+// Fires when a specific paid plan/pack is selected — the funnel's own
+// "adding this to my order" moment, still free (no payment yet).
+export function trackAddToCart({ planId, amount, currency } = {}) {
+  if (!isAdsHost() || !window.ttq) return;
+  const payload = { content_id: planId };
+  if (typeof amount === "number") payload.value = amount / 100;
+  if (currency) payload.currency = currency.toUpperCase();
+  window.ttq.track("AddToCart", payload);
+}

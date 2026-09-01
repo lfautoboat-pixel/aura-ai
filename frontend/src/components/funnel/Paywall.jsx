@@ -6,6 +6,7 @@ import { useI18n } from "@/i18n";
 import { isSupportedNebulaLanguage } from "@/nebula-i18n";
 import { planIds } from "@/data/plans";
 import api from "@/api";
+import { trackViewContent, trackAddToCart } from "@/tiktokPixel";
 
 const INITIAL_SECONDS = 9 * 60 + 59;
 
@@ -30,6 +31,10 @@ export function Paywall() {
     const id = setInterval(() => setSeconds((s) => (s > 0 ? s - 1 : 0)), 1000);
     return () => clearInterval(id);
   }, []);
+
+  // Reaching this screen at all is the "viewing the product" moment —
+  // free to fire, no payment involved.
+  useEffect(() => { trackViewContent(); }, []);
 
   useEffect(() => {
     api.get(`/billing/packs?currency=${currency}`).then(({ data }) => {
@@ -84,7 +89,13 @@ export function Paywall() {
               type="button"
               className={`plan-card ${active ? "active" : ""}`}
               data-testid={`plan-card-${id}`}
-              onClick={() => setPlanId(id)}
+              onClick={() => {
+                setPlanId(id);
+                // Only once per plan actually has a real price loaded —
+                // never fire with an undefined amount while packs are
+                // still loading.
+                if (plan) trackAddToCart({ planId: id, amount: plan.amount, currency });
+              }}
               disabled={!plan}
             >
               {badge && <span className="plan-tag" data-testid={`plan-tag-${id}`}>{badge}</span>}
