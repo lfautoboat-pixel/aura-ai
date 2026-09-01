@@ -960,11 +960,20 @@ async def _llm_reply(system: str, prompt: str, fallback: str, max_tokens: Option
     sibling key still has headroom today."""
     if not _llm_pool:
         return fallback, True
-    config_kwargs = {"system_instruction": system}
+    # thinking_level=MINIMAL was previously only applied to call-mode replies,
+    # but the "60-120 invisible thinking tokens per call" cost documented
+    # above hits every chat message, not just call mode — live latency
+    # measured just now (real replies landing anywhere from ~9s to over two
+    # minutes later) tracks with that uncapped thinking budget. Applying the
+    # same cap everywhere is the same proven fix, just no longer withheld
+    # from the far more common regular-chat path.
+    config_kwargs = {
+        "system_instruction": system,
+        "thinking_config": google_genai_types.ThinkingConfig(
+            thinking_level=google_genai_types.ThinkingLevel.MINIMAL),
+    }
     if max_tokens:
         config_kwargs["max_output_tokens"] = max_tokens
-        config_kwargs["thinking_config"] = google_genai_types.ThinkingConfig(
-            thinking_level=google_genai_types.ThinkingLevel.MINIMAL)
     config = google_genai_types.GenerateContentConfig(**config_kwargs)
 
     for index, client in _llm_pool.iter_clients():
