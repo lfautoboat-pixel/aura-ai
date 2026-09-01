@@ -1705,12 +1705,22 @@ async def checkout(body: CheckoutRequest, user=Depends(current_user)):
         raise HTTPException(500, f"Price not found: {lk}")
     price = prices[0]
 
+    # Real checkout-attempt data shows every visitor who reached this exact
+    # page abandoned before ever entering a card — Stripe confirms zero of
+    # them even started a PaymentIntent. This is the one thing we can still
+    # say on Stripe's own hosted page (branding needs the Dashboard, out of
+    # reach here) to close that trust gap at the moment it's opening.
+    reassurance = "Cancel anytime, no questions asked."
+    if item.get("trial"):
+        reassurance = "Your 3-day free trial starts now — cancel anytime before it ends and you won't be charged."
+
     kwargs = dict(
         line_items=[{"price": price.id, "quantity": 1}],
         mode="subscription" if price.recurring else "payment",
         success_url=f"{body.origin_url}/payment/success?session_id={{CHECKOUT_SESSION_ID}}",
         cancel_url=f"{body.origin_url}/payment/cancel",
         metadata={"user_id": user["id"], "item_key": body.item_key, "currency": cur},
+        custom_text={"submit": {"message": reassurance}},
     )
     # Pix only for BRL one-time payments
     want_pix = (cur in PIX_CURRENCIES) and not price.recurring
