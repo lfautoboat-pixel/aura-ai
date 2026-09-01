@@ -33,8 +33,10 @@ export function Paywall() {
   }, []);
 
   // Reaching this screen at all is the "viewing the product" moment —
-  // free to fire, no payment involved.
-  useEffect(() => { trackViewContent(); }, []);
+  // free to fire, no payment involved. selectedPlan is already the
+  // funnel's default pick at this point (see plans.js) even before anyone
+  // has clicked a plan card.
+  useEffect(() => { trackViewContent({ planId: selectedPlan }); }, []);
 
   useEffect(() => {
     api.get(`/billing/packs?currency=${currency}`).then(({ data }) => {

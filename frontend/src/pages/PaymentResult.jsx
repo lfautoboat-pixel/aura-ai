@@ -37,7 +37,7 @@ export function PaymentSuccess() {
           // Stripe itself, not just because this URL was visited. A
           // cancelled/expired session, or someone guessing a URL, never
           // reaches this branch.
-          trackPurchase({ amount: data.amount, currency: data.currency, eventId: sid });
+          trackPurchase({ amount: data.amount, currency: data.currency, eventId: sid, planId: data.item_key });
           await refresh();
           // Nebula funnel checkout (see CheckoutModal.jsx) stashes the reading
           // before redirecting here — send those users back into the funnel's

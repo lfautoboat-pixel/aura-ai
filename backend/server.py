@@ -1791,7 +1791,7 @@ async def _credit_partner_commission(user: dict, amount: int, currency: str, sou
     )
 
 
-async def _report_tiktok_purchase(user: dict, origin_url: str, amount: int, currency: str, event_id: str):
+async def _report_tiktok_purchase(user: dict, origin_url: str, amount: int, currency: str, event_id: str, item_key: str = None):
     """Best-effort only: a TikTok API hiccup must never fail a real purchase
     that already succeeded. Runs after the sale is already fulfilled, from
     both the webhook and the status-poll fallback (whichever gets there
@@ -1812,7 +1812,10 @@ async def _report_tiktok_purchase(user: dict, origin_url: str, amount: int, curr
             "event_time": int(datetime.now(timezone.utc).timestamp()),
             "event_id": event_id,
             "user": {"email": [hashed_email]} if hashed_email else {},
-            "properties": {"value": amount / 100, "currency": currency.upper()},
+            # content_id is required for TikTok's commerce-event diagnostics —
+            # missing it flagged as a critical issue even on a successful call.
+            "properties": {"value": amount / 100, "currency": currency.upper(),
+                            "content_id": item_key or "unknown", "content_type": "product"},
             "page": {"url": origin_url},
         }],
     }
@@ -1844,7 +1847,7 @@ async def _fulfill(record):
     user = await db.users.find_one({"id": record["user_id"]}, {"_id": 0})
     await _credit_partner_commission(user, record.get("amount", 0), record.get("currency", "usd"), "initial")
     await _report_tiktok_purchase(user, record.get("origin_url"), record.get("amount", 0),
-                                   record.get("currency", "usd"), record["session_id"])
+                                   record.get("currency", "usd"), record["session_id"], record.get("item_key"))
 
 
 @api.get("/payments/status/{session_id}")
@@ -1869,7 +1872,7 @@ async def payment_status(session_id: str):
         except stripe.error.StripeError:
             pass
     return {"session_id": record["session_id"], "status": record["status"],
-            "payment_status": record["payment_status"],
+            "payment_status": record["payment_status"], "item_key": record.get("item_key"),
             "amount": record.get("amount"), "currency": record.get("currency")}
 
 
