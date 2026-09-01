@@ -99,8 +99,17 @@ export function CheckoutModal() {
 
   const pay = async () => {
     savePendingReading({ image, answers, readingId, language });
+    // startCheckout's own contract (shared with Paywall.jsx, where "busy"
+    // holds the item_key of whichever plan button is loading) calls
+    // setBusy(item_key) the instant it starts and setBusy("") only on
+    // error. Passing a bare `() => setBusy(false)` here ignored that
+    // item_key argument and unset "busy" immediately — the button
+    // re-enabled itself right before the (sometimes multi-second) network
+    // call, not after it. A real visitor hit exactly this: 3 separate
+    // checkout sessions created ~1s apart, each redirect superseding the
+    // last before they could land on one and actually pay.
     setBusy(true);
-    await startCheckout(selectedPlan, currency, () => setBusy(false));
+    await startCheckout(selectedPlan, currency, (v) => setBusy(!!v));
   };
 
   const googleConfigured = !!GOOGLE_CLIENT_ID;
