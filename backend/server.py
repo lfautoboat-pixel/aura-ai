@@ -1367,6 +1367,38 @@ async def regenerate_partner_link(partner_id: str, admin=Depends(require_admin))
     return {"dashboard_token": new_token}
 
 
+@api.get("/admin/otps-pending")
+async def admin_otps_pending(admin=Depends(require_admin)):
+    """verify-otp deletes the db.otps record on success — so whatever is
+    still sitting here is, by construction, every email that requested a
+    login code via the email path and never came back to redeem it: either
+    the code never arrived (spam filter), they gave up mid-way, or they
+    mistyped it repeatedly and abandoned. This is the actual answer to
+    "how many people tried the email path and got stuck", not a guess."""
+    rows = await db.otps.find({}, {"_id": 0, "code": 0}).sort("created_at", -1).to_list(500)
+    return rows
+
+
+@api.get("/admin/all-users")
+async def admin_all_users(admin=Depends(require_admin)):
+    """Every account ever created, regardless of how far they got —
+    signup method (Google vs email code, inferred from whether a Google
+    `picture` is on file), premium/credit state, and whether they ever
+    reached checkout (cross-referenced against payment_transactions).
+    The full funnel in one place, not just whoever reached Stripe."""
+    users = await db.users.find({}, {"_id": 0}).sort("created_at", -1).to_list(1000)
+    tx = await db.payment_transactions.find({}, {"_id": 0, "user_id": 1, "payment_status": 1}).to_list(1000)
+    tx_by_user = {}
+    for t in tx:
+        tx_by_user.setdefault(t.get("user_id"), []).append(t.get("payment_status"))
+    for u in users:
+        u["signed_up_via_google"] = bool(u.get("picture"))
+        u["reached_checkout"] = u["id"] in tx_by_user
+        u["checkout_statuses"] = tx_by_user.get(u["id"], [])
+        u.pop("picture", None)
+    return users
+
+
 @api.get("/admin/partners/{partner_id}/earnings")
 async def partner_earnings_ledger(partner_id: str, admin=Depends(require_admin)):
     rows = await db.partner_earnings.find({"partner_id": partner_id}, {"_id": 0}).sort("created_at", -1).to_list(500)
