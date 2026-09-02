@@ -588,7 +588,12 @@ FLASH = {
 }
 SUBS = {
     "premium_weekly": {"interval": "week", "usd": 899,  "brl": 1990,  "eur": 899,  "gbp": 799,  "trial": True},
-    "premium_annual": {"interval": "year", "usd": 5899, "brl": 11990, "eur": 5899, "gbp": 5299, "best": True},
+    # usd/eur/gbp temporarily dropped for a live conversion test (2026-09-01)
+    # — brl untouched, it was never the currency in question. Real Stripe
+    # Price objects were recreated to match via /admin/reprice; reverting
+    # this dict alone is NOT enough to revert the real charge, that needs
+    # another /admin/reprice call back to the original amounts.
+    "premium_annual": {"interval": "year", "usd": 499, "brl": 11990, "eur": 499, "gbp": 399, "best": True},
 }
 CUR_SYMBOL = {"usd": "$", "brl": "R$", "eur": "€", "gbp": "£"}
 PIX_CURRENCIES = {"brl"}
@@ -1759,6 +1764,35 @@ async def checkout(body: CheckoutRequest, user=Depends(current_user)):
         "origin_url": body.origin_url, "created_at": now_iso(), "updated_at": now_iso(),
     })
     return {"checkout_url": session.url, "session_id": session.id}
+
+
+@api.post("/admin/reprice")
+async def admin_reprice(item_key: str, currency: str, new_amount_cents: int, admin=Depends(require_admin)):
+    """Stripe Prices are immutable — editing the PACKS/SUBS dict alone
+    changes what the paywall displays but NOT what actually gets charged,
+    since /payments/checkout looks up the real Price object by lookup_key
+    and uses ITS unit_amount. This deactivates the old Price for that
+    lookup_key and creates a new one at the new amount (Stripe's own
+    documented price-versioning pattern — a lookup_key only has to be
+    unique among ACTIVE prices), so the two stay in sync. The caller is
+    still responsible for editing the PACKS/SUBS dict to match, for display."""
+    cur = currency.lower()
+    if cur not in SUPPORTED_CURRENCIES:
+        raise HTTPException(400, f"Unsupported currency: {currency}")
+    lk = lookup_key(item_key, cur)
+    old_prices = stripe.Price.list(lookup_keys=[lk], active=True, limit=1).data
+    if not old_prices:
+        raise HTTPException(404, f"No active price found for {lk}")
+    old_price = old_prices[0]
+    stripe.Price.modify(old_price.id, active=False)
+    create_kwargs = dict(product=old_price.product, unit_amount=new_amount_cents, currency=cur, lookup_key=lk)
+    if old_price.recurring:
+        # old_price.recurring is a Stripe object, not the plain dict the API
+        # expects back on create — pull out just the interval it needs.
+        create_kwargs["recurring"] = {"interval": old_price.recurring.interval}
+    new_price = stripe.Price.create(**create_kwargs)
+    return {"old_price_id": old_price.id, "old_amount": old_price.unit_amount,
+            "new_price_id": new_price.id, "new_amount": new_price.unit_amount}
 
 
 @api.post("/admin/tiktok-test-purchase")
