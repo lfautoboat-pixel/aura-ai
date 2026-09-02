@@ -1774,27 +1774,28 @@ async def admin_reprice(item_key: str, currency: str, new_amount_cents: int, adm
     """Stripe Prices are immutable — editing the PACKS/SUBS dict alone
     changes what the paywall displays but NOT what actually gets charged,
     since /payments/checkout looks up the real Price object by lookup_key
-    and uses ITS unit_amount. This deactivates the old Price for that
-    lookup_key and creates a new one at the new amount (Stripe's own
-    documented price-versioning pattern — a lookup_key only has to be
-    unique among ACTIVE prices), so the two stay in sync. The caller is
-    still responsible for editing the PACKS/SUBS dict to match, for display."""
+    and uses ITS unit_amount. Confirmed the hard way: deactivating the old
+    Price does NOT free its lookup_key for reuse — Stripe enforces
+    uniqueness across active AND inactive prices, so a bare deactivate+
+    create left the lookup_key claimed by a dead price and /payments/checkout
+    500ing for real traffic. The actual fix is to explicitly clear
+    lookup_key off every price still holding it (active or not) before
+    creating the replacement."""
     cur = currency.lower()
     if cur not in SUPPORTED_CURRENCIES:
         raise HTTPException(400, f"Unsupported currency: {currency}")
     lk = lookup_key(item_key, cur)
     # No active= filter: an earlier failed run of this same endpoint can
-    # leave a lookup_key with zero ACTIVE prices (deactivated the old one,
-    # crashed before creating the new one) — searching only active=True
-    # then finds nothing and can't even recover the product id to fix it.
+    # leave a lookup_key claimed by a deactivated price with no active
+    # replacement — searching only active=True then finds nothing and
+    # can't even recover the product id to fix it.
     any_prices = stripe.Price.list(lookup_keys=[lk], limit=10).data
     if not any_prices:
         raise HTTPException(404, f"No price at all (active or not) found for {lk} — never created in Stripe")
-    active = [p for p in any_prices if p.active]
-    reference = active[0] if active else any_prices[0]
+    reference = next((p for p in any_prices if p.active), any_prices[0])
     old_id, old_amount = reference.id, reference.unit_amount
-    for p in active:
-        stripe.Price.modify(p.id, active=False)
+    for p in any_prices:
+        stripe.Price.modify(p.id, active=False, lookup_key="")
     create_kwargs = dict(product=reference.product, unit_amount=new_amount_cents, currency=cur, lookup_key=lk)
     if reference.recurring:
         create_kwargs["recurring"] = {"interval": reference.recurring.interval}
@@ -1807,7 +1808,7 @@ async def admin_reprice(item_key: str, currency: str, new_amount_cents: int, adm
         raise HTTPException(500, f"Price.create failed for {lk} (old price {old_id} already deactivated): {e.user_message or str(e)}")
     return {"old_price_id": old_id, "old_amount": old_amount,
             "new_price_id": new_price.id, "new_amount": new_price.unit_amount,
-            "recovered_from_broken_state": not active}
+            "recovered_from_broken_state": not reference.active}
 
 
 @api.post("/admin/tiktok-test-purchase")
