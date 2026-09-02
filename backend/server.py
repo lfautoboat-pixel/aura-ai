@@ -1783,19 +1783,31 @@ async def admin_reprice(item_key: str, currency: str, new_amount_cents: int, adm
     if cur not in SUPPORTED_CURRENCIES:
         raise HTTPException(400, f"Unsupported currency: {currency}")
     lk = lookup_key(item_key, cur)
-    old_prices = stripe.Price.list(lookup_keys=[lk], active=True, limit=1).data
-    if not old_prices:
-        raise HTTPException(404, f"No active price found for {lk}")
-    old_price = old_prices[0]
-    stripe.Price.modify(old_price.id, active=False)
-    create_kwargs = dict(product=old_price.product, unit_amount=new_amount_cents, currency=cur, lookup_key=lk)
-    if old_price.recurring:
-        # old_price.recurring is a Stripe object, not the plain dict the API
-        # expects back on create — pull out just the interval it needs.
-        create_kwargs["recurring"] = {"interval": old_price.recurring.interval}
-    new_price = stripe.Price.create(**create_kwargs)
-    return {"old_price_id": old_price.id, "old_amount": old_price.unit_amount,
-            "new_price_id": new_price.id, "new_amount": new_price.unit_amount}
+    # No active= filter: an earlier failed run of this same endpoint can
+    # leave a lookup_key with zero ACTIVE prices (deactivated the old one,
+    # crashed before creating the new one) — searching only active=True
+    # then finds nothing and can't even recover the product id to fix it.
+    any_prices = stripe.Price.list(lookup_keys=[lk], limit=10).data
+    if not any_prices:
+        raise HTTPException(404, f"No price at all (active or not) found for {lk} — never created in Stripe")
+    active = [p for p in any_prices if p.active]
+    reference = active[0] if active else any_prices[0]
+    old_id, old_amount = reference.id, reference.unit_amount
+    for p in active:
+        stripe.Price.modify(p.id, active=False)
+    create_kwargs = dict(product=reference.product, unit_amount=new_amount_cents, currency=cur, lookup_key=lk)
+    if reference.recurring:
+        create_kwargs["recurring"] = {"interval": reference.recurring.interval}
+    try:
+        new_price = stripe.Price.create(**create_kwargs)
+    except stripe.error.StripeError as e:
+        # Surface Stripe's own message instead of a bare 500 — this is
+        # exactly the step that silently failed last time, leaving the
+        # lookup_key with zero active prices and real checkout broken.
+        raise HTTPException(500, f"Price.create failed for {lk} (old price {old_id} already deactivated): {e.user_message or str(e)}")
+    return {"old_price_id": old_id, "old_amount": old_amount,
+            "new_price_id": new_price.id, "new_amount": new_price.unit_amount,
+            "recovered_from_broken_state": not active}
 
 
 @api.post("/admin/tiktok-test-purchase")
