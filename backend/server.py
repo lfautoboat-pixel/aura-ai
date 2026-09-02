@@ -1391,6 +1391,25 @@ async def list_transactions(admin=Depends(require_admin)):
     return rows
 
 
+@api.get("/admin/users/{user_id}")
+async def admin_user_detail(user_id: str, admin=Depends(require_admin)):
+    """How did this specific visitor sign up — Google (has a `picture` from
+    the OAuth profile, no OTP round-trip at all) or email code (no
+    `picture`, depends entirely on that email actually arriving)? Needed to
+    tell whether the spam-filtered OTP email theory could even apply to a
+    given real checkout attempt, instead of guessing from the email
+    address's domain alone."""
+    user = await db.users.find_one({"id": user_id}, {"_id": 0})
+    if not user:
+        raise HTTPException(404, "User not found")
+    return {
+        "email": user.get("email"),
+        "name": user.get("name"),
+        "signed_up_via_google": bool(user.get("picture")),
+        "created_at": user.get("created_at"),
+    }
+
+
 @api.get("/admin/transactions/{session_id}/stripe-detail")
 async def transaction_stripe_detail(session_id: str, admin=Depends(require_admin)):
     """Digs past our own payment_status="pending" into what Stripe itself
