@@ -578,22 +578,25 @@ def with_status(doc):
 # pricing" pattern as usd/brl) — not scraped from any competitor's regional
 # pricing, which we never confirmed. Adjust freely once real market data exists.
 SUPPORTED_CURRENCIES = ("usd", "brl", "eur", "gbp")
+# usd/eur/gbp across EVERY item below were temporarily dropped to a uniform
+# floor for a live conversion test (2026-09-01) — brl untouched, it was
+# never the currency in question, and every real checkout attempt so far
+# was usd/gbp. $2.99/€2.99/£2.49 still clears Stripe's per-transaction fee
+# with real margin. Real Stripe Price objects were recreated to match via
+# /admin/reprice for every item×currency pair — reverting these dicts alone
+# is NOT enough to revert the real charge, that needs /admin/reprice calls
+# back to the original amounts (kept in the same comment on each line below).
 PACKS = {
-    "credits_60":  {"credits": 60,  "usd": 899,  "brl": 2490, "eur": 899,  "gbp": 799},
-    "credits_160": {"credits": 160, "usd": 1899, "brl": 4990, "eur": 1899, "gbp": 1699, "popular": True},
-    "credits_360": {"credits": 360, "usd": 3899, "brl": 9990, "eur": 3899, "gbp": 3499},
+    "credits_60":  {"credits": 60,  "usd": 299,  "brl": 2490, "eur": 299,  "gbp": 249},  # orig usd 899 eur 899 gbp 799
+    "credits_160": {"credits": 160, "usd": 299, "brl": 4990, "eur": 299, "gbp": 249, "popular": True},  # orig usd 1899 eur 1899 gbp 1699
+    "credits_360": {"credits": 360, "usd": 299, "brl": 9990, "eur": 299, "gbp": 249},  # orig usd 3899 eur 3899 gbp 3499
 }
 FLASH = {
-    "flash_160": {"credits": 160, "usd": 699, "brl": 1990, "eur": 699, "gbp": 599, "flash": True},
+    "flash_160": {"credits": 160, "usd": 299, "brl": 1990, "eur": 299, "gbp": 249, "flash": True},  # orig usd 699 eur 699 gbp 599
 }
 SUBS = {
-    "premium_weekly": {"interval": "week", "usd": 899,  "brl": 1990,  "eur": 899,  "gbp": 799,  "trial": True},
-    # usd/eur/gbp temporarily dropped for a live conversion test (2026-09-01)
-    # — brl untouched, it was never the currency in question. Real Stripe
-    # Price objects were recreated to match via /admin/reprice; reverting
-    # this dict alone is NOT enough to revert the real charge, that needs
-    # another /admin/reprice call back to the original amounts.
-    "premium_annual": {"interval": "year", "usd": 499, "brl": 11990, "eur": 499, "gbp": 399, "best": True},
+    "premium_weekly": {"interval": "week", "usd": 299,  "brl": 1990,  "eur": 299,  "gbp": 249,  "trial": True},  # orig usd 899 eur 899 gbp 799
+    "premium_annual": {"interval": "year", "usd": 299, "brl": 11990, "eur": 299, "gbp": 249, "best": True},  # orig usd 5899 eur 5899 gbp 5299
 }
 CUR_SYMBOL = {"usd": "$", "brl": "R$", "eur": "€", "gbp": "£"}
 PIX_CURRENCIES = {"brl"}
