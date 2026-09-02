@@ -86,7 +86,13 @@ export default function Funnel() {
       });
       login(data.token, data.user);
       setS(8);
-    } catch { setCode(""); setAuthError(t("auth_error")); } finally { setSending(false); }
+    } catch (e) {
+      setCode("");
+      // Same fix as CheckoutModal.jsx: a wrong/mistyped code was showing
+      // the same "check your connection" message as an actual network
+      // failure, right at the step before payment.
+      setAuthError(e?.response?.status === 400 ? t("invalid_code_error") : t("auth_error"));
+    } finally { setSending(false); }
   };
 
   const googleConfigured = !!process.env.REACT_APP_GOOGLE_CLIENT_ID;

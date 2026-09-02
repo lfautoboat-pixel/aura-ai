@@ -179,6 +179,7 @@ const pl = {
     close: "Zamknij",
     trust: "SSL 256-bit · Anuluj w każdej chwili · 30-dniowa gwarancja",
     authError: "Coś poszło nie tak. Sprawdź połączenie i spróbuj ponownie.",
+    invalidCodeError: "Ten kod jest nieprawidłowy. Sprawdź e-mail i spróbuj ponownie.",
     continueToApp: "Przejdź do Aura",
   },
   result: {

@@ -136,6 +136,7 @@ const de = {
     close: "Schließen",
     trust: "256-Bit-SSL · Jederzeit kündbar · 30-Tage-Garantie",
     authError: "Etwas ist schiefgelaufen. Prüfe deine Verbindung und versuche es erneut.",
+    invalidCodeError: "Der Code ist nicht richtig. Prüfe die E-Mail und versuche es erneut.",
     continueToApp: "Weiter zu Aura",
   },
   result: {

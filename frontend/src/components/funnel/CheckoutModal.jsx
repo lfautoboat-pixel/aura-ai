@@ -76,9 +76,14 @@ export function CheckoutModal() {
     try {
       const { data } = await api.post("/auth/verify-otp", { email, code, ref: getReferral() });
       login(data.token, data.user);
-    } catch {
+    } catch (e) {
       setCode("");
-      setErrorMsg(t.checkout.authError);
+      // A wrong/mistyped code (the overwhelmingly common case here) was
+      // showing the same "check your connection" message as an actual
+      // network failure — right at the one step standing between a real
+      // visitor and paying, that reads as "the site is broken" instead of
+      // "try the code again", which is a much easier ask.
+      setErrorMsg(e?.response?.status === 400 ? t.checkout.invalidCodeError : t.checkout.authError);
     } finally {
       setBusy(false);
     }

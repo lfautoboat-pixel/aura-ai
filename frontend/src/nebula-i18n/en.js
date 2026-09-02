@@ -192,6 +192,7 @@ const en = {
     close: "Close",
     trust: "256-bit SSL · Cancel anytime · 30-day guarantee",
     authError: "Something went wrong. Check your connection and try again.",
+    invalidCodeError: "That code isn't right. Double-check the email and try again.",
     continueToApp: "Continue to Aura",
   },
   result: {

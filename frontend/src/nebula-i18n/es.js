@@ -136,6 +136,7 @@ const es = {
     close: "Cerrar",
     trust: "SSL 256-bit · Cancela cuando quieras · Garantía 30 días",
     authError: "Algo salió mal. Verifica tu conexión e intenta de nuevo.",
+    invalidCodeError: "Ese código no es correcto. Revisa el correo e intenta de nuevo.",
     continueToApp: "Continuar a Aura",
   },
   result: {
